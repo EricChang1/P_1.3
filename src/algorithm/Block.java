@@ -1,16 +1,17 @@
 package algorithm;
 
-public class Block extends BasicShape {
-	
-	private Block(ArrayList MatrixHVectors, double value){
+import java.util.ArrayList;
 
+public class Block extends BasicShape 
+{
+	public Block (double value, BasicShape bShape)
+	{
+		super (bShape);
+		this.value = value;
 	}
 
-	private Block(double value, shape BShape){
-
-	}
-
-	private double getValue(){
+	public double getValue()
+	{
 		return value;
 	}
 

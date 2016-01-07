@@ -45,6 +45,17 @@ public abstract class Matrix <T extends Number>
 			clone.copyValues(this, 0, 0);
 			return clone;
 		}
+		
+		public DoubleMatrix toDoubleMatrix()
+		{
+			DoubleMatrix dm = new DoubleMatrix (getRows(), getColumns());
+			for (int cRow = 0; cRow < getRows(); ++cRow)
+			{
+				for (int cCol = 0; cCol < getColumns(); ++cCol)
+					dm.setCell(cRow, cCol, this.getCell(cRow, cCol).doubleValue());
+			}
+			return dm;
+		}
 
 		@Override
 		public Integer vectorProduct (Integer[] v1, Integer[] v2) throws MatrixDimensionMismatchException 
@@ -80,6 +91,17 @@ public abstract class Matrix <T extends Number>
 			DoubleMatrix clone = new DoubleMatrix(getRows(), getColumns());
 			clone.copyValues(this, 0, 0);
 			return clone;
+		}
+		
+		public IntegerMatrix toIntegerMatrix()
+		{
+			IntegerMatrix im = new IntegerMatrix (getRows(), getColumns());
+			for (int cRow = 0; cRow < getRows(); ++cRow)
+			{
+				for (int cCol = 0; cCol < getColumns(); ++cCol)
+					im.setCell(cRow, cCol, this.getCell(cRow, cCol).intValue());
+			}
+			return im;
 		}
 
 		@Override
