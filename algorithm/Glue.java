@@ -1,29 +1,31 @@
-package algorithm;
+import java.util.ArrayList;
 
-public class Glue extends Position
-{
-	/** Set a Position of a block
-	 * @param Pos desired position of block
-	 */
-	public void glueBlock(Position Pos)
-	{
+public class Glue {
 
-	}
-	/** Sets position according to integer coordinates
-	 * @param position Holds x,y,z coordinates
-	 */
-	public void setPosition(int X, int Y, int Z)
-	{
-		
-	}
-	/**
-	 * @return Position of glue
-	 */
-	private Position getPosition()
-	{
-		return gluePos;
-	}
+public Glue(ArrayList<Integer> position){
+	ArrayList<Integer> pos = position; 
+	if (pos.size() != 3) throw new GlueException();
+}
+
+/**
+* @return Position of glue
+*/
+public ArrayList<Integer> getPosition(){
+		return pos;
+}
+
+/** Nested class to create a custom exception
+ */
+static class GlueException extends IllegalArgumentException{
 	
-	private Position gluePos;
+	/**Exception constructor
+	 */
+	public GlueException(){
+		super();
+	}
+}
+	
+private ArrayList<Integer> pos;
+protected int x, y, z;
 
 }
