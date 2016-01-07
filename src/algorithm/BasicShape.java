@@ -14,12 +14,16 @@ public class BasicShape
 	}
 	
 	
-	public BasicShape(ArrayList <Matrix<Integer>> vectors, Matrix.IntegerMatrix adjMatrix){
+	public BasicShape(ArrayList <Matrix.IntegerMatrix> vectors, Matrix.IntegerMatrix adjMatrix){
 
 		ArrayList<Integer> dimensions = new ArrayList<Integer>();
 		calcDim (vectors);
 		this.adjMatrix = adjMatrix.clone();
-
+	}
+	
+	public BasicShape (BasicShape clone)
+	{
+		this (clone.vectors, clone.adjMatrix);
 	}
 	
 	/** @return the dimensions of a shape given an index.
@@ -31,7 +35,7 @@ public class BasicShape
 	/** Calculates the dimensions of a shape
 	** @param vectors ArrayList containing all the vectors
 	*/
-	public void calcDim(ArrayList<Matrix<Integer>> vectors) throws BadNumberOfRowsException{
+	public void calcDim(ArrayList<Matrix.IntegerMatrix> vectors) throws BadNumberOfRowsException{
 		
 		if (!numberOfMH(vectors)) 
 			throw new BadNumberOfRowsException ("vectors don't have the same dimension");
@@ -48,7 +52,7 @@ public class BasicShape
 	* @param vectors Arraylist containing all the vectors
 	* @return false if one Matrix Handler doesn't have the same number of rows
 	*/
-	public boolean numberOfMH(ArrayList<Matrix<Integer>> vectors){
+	public boolean numberOfMH(ArrayList<Matrix.IntegerMatrix> vectors){
 
 		int numberOfRows=vectors.get(0).getRows();
 		for(Matrix<Integer> temp: vectors){
@@ -62,7 +66,7 @@ public class BasicShape
 	* @param index The index of the vector in the Matrix Handler
 	* @return the maximum value.
 	*/
-	public int maximum(ArrayList <Matrix<Integer>> vectors, int index){
+	public int maximum(ArrayList <Matrix.IntegerMatrix> vectors, int index){
 
 		int max = Integer.MIN_VALUE;
     	for(Matrix<Integer> temp : vectors){
@@ -78,7 +82,7 @@ public class BasicShape
 	* @param index The index of the vector in the Matrix Handler
 	* @return the minimum value.
 	*/
-	public int minimum(ArrayList<Matrix<Integer>> vectors, int index){
+	public int minimum(ArrayList<Matrix.IntegerMatrix> vectors, int index){
 
 		int min = Integer.MAX_VALUE;
     	for(Matrix<Integer> temp: vectors){
@@ -143,5 +147,5 @@ public class BasicShape
 	
 	private ArrayList<Matrix.IntegerMatrix> vectors;
 	private ArrayList<Integer> dimensions;
-	private Matrix<Integer> adjMatrix;
+	private Matrix.IntegerMatrix adjMatrix;
 }
