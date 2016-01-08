@@ -62,9 +62,9 @@ public static class Container extends Block
 			if (checkPositionOverlap(block, pos)) {
 				//Place Block at pos
 			}
-			else throw WrongPositionException("position overlaps", pos);
+			else throw new WrongPositionException("position overlaps", pos);
 		}
-		else throw WrongPositionException("position is not inside of the container", pos);
+		else throw new WrongPositionException("position is not inside of the container", pos);
 	}
 	
 	/** @param pos Position queried block is at
