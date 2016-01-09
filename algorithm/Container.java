@@ -60,7 +60,10 @@ public static class Container extends Block
 	{
 		if (checkPositionValid(block, pos)) {
 			if (checkPositionOverlap(block, pos)) {
-				//Place Block at pos
+				Glue glue = new Glue(pos);
+				//Nothing implemented in glue that I could use to place the block
+				block.glueBlock(pos);
+
 			}
 			else throw new WrongPositionException("position overlaps", pos);
 		}
@@ -82,7 +85,7 @@ public static class Container extends Block
 	/** @return a string representation of the container**/
 	public String toString()
 	{
-		
+		return "Height: " + this.getHeight() + ", width: " + this.getWidth() + " glues at: " + this.mGluedBlocks;
 	}
 	
 	/**	@param block the block object to place
