@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 import algorithm.Matrix.DoubleMatrix;
 
+
 public class BasicShape 
 {
+	@SuppressWarnings("serial")
 	public static class BadNumberOfRowsException extends IllegalArgumentException
 	{
 		public BadNumberOfRowsException() {super(); }
@@ -13,14 +15,22 @@ public class BasicShape
 		public BadNumberOfRowsException (String message) { super (message); }
 	}
 	
-	
+	/**
+	 * constructor: constructs shape from vectors to vertices and adjacency matrix
+	 * @param vectors set of vectors to vertices
+	 * @param adjMatrix adjacency matrix detailing which points are connected
+	 */
 	public BasicShape(ArrayList <Matrix.IntegerMatrix> vectors, Matrix.IntegerMatrix adjMatrix){
 
-		ArrayList<Integer> dimensions = new ArrayList<Integer>();
+		dimensions = new ArrayList<Integer>();
 		calcDim (vectors);
 		this.adjMatrix = adjMatrix.clone();
 	}
 	
+	/**
+	 * clone constructor
+	 * @param clone basic shape whose vectors and adjacency matrix are to be used
+	 */
 	public BasicShape (BasicShape clone)
 	{
 		this (clone.vectors, clone.adjMatrix);
@@ -62,7 +72,7 @@ public class BasicShape
 		return true;
 	}
 	/** calculates the maximum vector value
-	* @param vector Arraylist containing all the vectors
+	* @param vector ArrayList containing all the vectors
 	* @param index The index of the vector in the Matrix Handler
 	* @return the maximum value.
 	*/
@@ -78,7 +88,7 @@ public class BasicShape
 
 	}
 	/** calculates the minimum vector value
-	* @param vector Arraylist containing all the vectors
+	* @param vector ArrayList containing all the vectors
 	* @param index The index of the vector in the Matrix Handler
 	* @return the minimum value.
 	*/
@@ -109,25 +119,25 @@ public class BasicShape
 	 * @param angle2 Desired amount of rotation in vertical axis (in degrees)
 	 * @return rotation matrix
 	 */
-	public Matrix rotationMatrix(double angle1, double angle2){
+	public Matrix.DoubleMatrix rotationMatrix(double angle1, double angle2){
 		double radAngle1 = Math.toRadians (angle1);
 		double radAngle2 = Math.toRadians (angle2);
 
-		Matrix <Double> rotationMatrix1 = new Matrix.DoubleMatrix (3, 3);
+		Matrix.DoubleMatrix rotationMatrix1 = new Matrix.DoubleMatrix (3, 3);
 		rotationMatrix1.setCell (0, 0, Math.cos (radAngle1));
 		rotationMatrix1.setCell (1, 0, Math.sin (radAngle1));
 		rotationMatrix1.setCell (0, 1, -Math.sin (radAngle1));
 		rotationMatrix1.setCell (1, 1, -Math.cos (radAngle1));
 		rotationMatrix1.setCell (2, 2, 1.0);
 
-		Matrix <Double> rotationMatrix2 = new Matrix.DoubleMatrix (3, 3);
+		Matrix.DoubleMatrix rotationMatrix2 = new Matrix.DoubleMatrix (3, 3);
 		rotationMatrix2.setCell (0, 0, Math.cos (radAngle2));
 		rotationMatrix2.setCell (1, 0, -Math.sin (radAngle2));
 		rotationMatrix2.setCell (0, 1, 1.0);
 		rotationMatrix2.setCell (1, 1, Math.sin (radAngle2));
 		rotationMatrix2.setCell (2, 2, Math.cos (radAngle2));
 
-		return rotationMatrix1.multiply (rotationMatrix2, new Matrix.DoubleMatrix (3, 3));
+		return (DoubleMatrix) rotationMatrix1.multiply (rotationMatrix2, new Matrix.DoubleMatrix (3, 3));
 	}
 	
 	/** Performs actual rotation
