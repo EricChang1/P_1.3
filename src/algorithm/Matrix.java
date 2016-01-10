@@ -1,10 +1,20 @@
 package algorithm;
 
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+/**
+ * Class modeling a generic matrix
+ * @author martin
+ * @param <T> type of entries of matrix
+ */
 public abstract class Matrix <T extends Number> 
 {
+	/**
+	 * Exception thrown when index beyond the bounds of the matrix is used to access the matrix
+	 * @author martin
+	 */
 	public static class MatrixOutOfBoundsException extends ArrayIndexOutOfBoundsException
 	{
 		private static final long serialVersionUID = 1L;
@@ -14,6 +24,11 @@ public abstract class Matrix <T extends Number>
 		public MatrixOutOfBoundsException (String message) {super (message); }
 	}
 	
+	@SuppressWarnings("serial")
+	/**
+	 * Exception throws when dimension of a matrix does not conform with preconditions
+	 * @author martin
+	 */
 	public static class MatrixDimensionMismatchException extends IllegalArgumentException
 	{
 		public MatrixDimensionMismatchException() {super(); }
@@ -21,7 +36,10 @@ public abstract class Matrix <T extends Number>
 		public MatrixDimensionMismatchException (String message) {super (message); } 
 	}
 
-
+	/**
+	 * Extension of matrix: models matrix whose entries are integers
+	 * @author martin
+	 */
 	public static class IntegerMatrix extends Matrix <Integer>
 	{
 		/** Constructs matrix whose cells are initialized to 0
@@ -39,6 +57,10 @@ public abstract class Matrix <T extends Number>
 			}
 		}
 		
+		/**
+		 * cloning method
+		 * @return a clone of this
+		 */
 		public IntegerMatrix clone()
 		{
 			IntegerMatrix clone = new IntegerMatrix(getRows(), getColumns());
@@ -46,6 +68,10 @@ public abstract class Matrix <T extends Number>
 			return clone;
 		}
 		
+		/**
+		 * conversion method from integer to double matrix
+		 * @return newly constructed double matrix containing converted entries
+		 */
 		public DoubleMatrix toDoubleMatrix()
 		{
 			DoubleMatrix dm = new DoubleMatrix (getRows(), getColumns());
@@ -56,7 +82,30 @@ public abstract class Matrix <T extends Number>
 			}
 			return dm;
 		}
+		
+		public Integer[] getColumn (int col)
+		{
+			if (col >= getColumns())
+				throw new MatrixOutOfBoundsException ("Could not get column with index " + col);
+			
+			Integer[] arr = new Integer[getRows()];
+			for (int cRow = 0; cRow < getRows(); ++cRow)
+				arr[cRow] = getCell (cRow, col);
+			return arr;
+		}
 
+		/**
+		 * @return zero according to data type
+		 */
+		public Integer getZero()
+		{
+			return new Integer(0);
+		}
+		
+		/**
+		 * Performs vector product on integer arrays
+		 * @return vector product
+		 */
 		@Override
 		public Integer vectorProduct (Integer[] v1, Integer[] v2) throws MatrixDimensionMismatchException 
 		{
@@ -86,6 +135,10 @@ public abstract class Matrix <T extends Number>
 			}
 		}
 		
+		/**
+		 * cloning method
+		 * @return a clone
+		 */
 		public DoubleMatrix clone()
 		{
 			DoubleMatrix clone = new DoubleMatrix(getRows(), getColumns());
@@ -93,6 +146,10 @@ public abstract class Matrix <T extends Number>
 			return clone;
 		}
 		
+		/**
+		 * conversion method from double to int matrix
+		 * @return newly constructed int matrix containing converted entries
+		 */
 		public IntegerMatrix toIntegerMatrix()
 		{
 			IntegerMatrix im = new IntegerMatrix (getRows(), getColumns());
@@ -103,8 +160,31 @@ public abstract class Matrix <T extends Number>
 			}
 			return im;
 		}
-
+		
+		public Double[] getColumn (int row)
+		{
+			if (row >= getColumns())
+				throw new MatrixOutOfBoundsException ("Could not get column with index " + row);
+			
+			Double[] arr = new Double[getRows()];
+			for (int cRow = 0; cRow < getRows(); ++cRow)
+				arr[cRow] = getCell (cRow, row);
+			return arr;
+		}
+		
+		/**
+		 * @return zero according to data type
+		 */
+		public Double getZero()
+		{
+			return new Double (0.0);
+		}
+		
 		@Override
+		/**
+		 * Performs vector product on double arrays
+		 * @return vector product
+		 */
 		public Double vectorProduct(Double[] v1, Double[] v2) throws algorithm.Matrix.MatrixDimensionMismatchException 
 		{
 			if (v1.length != v2.length)
@@ -132,6 +212,11 @@ public abstract class Matrix <T extends Number>
 	 * @throws MatrixDimensionMismatchException
 	 */
 	public abstract T vectorProduct (T[] v1, T[] v2) throws MatrixDimensionMismatchException;
+	
+	/**
+	 * @return zero value according to data type
+	 */
+	public abstract T getZero();
 	
 	//accessor methods
 	/**
@@ -167,19 +252,13 @@ public abstract class Matrix <T extends Number>
 	 * @param col column index
 	 * @return array containing elements of column
 	 */
-	public T[] getColumn (int col)
-	{
-		if (col >= getColumns())
-			throw new MatrixOutOfBoundsException ("Could not get column with index " + col);
-		ArrayList <T> vals = new ArrayList <T>();
-		for (int cRow = 0; cRow < getRows(); ++cRow)
-			vals.add (getCell (cRow, col));
-		return (T[]) vals.toArray();
-	}
+	public abstract T[] getColumn (int col);
 	
-	/** Gets the value of the cell safely and returns -1 if not successful 
+	/** @param row row index
+	 * 	@param col column index
+	 * 	@return cell at specified index
 	 * 	@throws MatrixOutOfBoundsException
-	*/
+	 */
 	public T getCell (int row, int col) throws MatrixOutOfBoundsException
 	{
 		if (row < getRows() && col < getColumns())
@@ -187,7 +266,7 @@ public abstract class Matrix <T extends Number>
 		else
 			throw new MatrixOutOfBoundsException (row + "|" + col + " out of bounds in " + getRows() + "x" + getColumns() + " matrix");
 	}
-	
+
 	/**
 	 * @param rowIndex index of row to count
 	 * @return Number of set cells in rowIndex
@@ -197,7 +276,7 @@ public abstract class Matrix <T extends Number>
 		int cnt = 0;
 		for (int cCol = 0; cCol < getColumns(); ++cCol)
 		{
-			if (!getCell(rowIndex, cCol).equals (0))
+			if (!getCell(rowIndex, cCol).equals (getZero()))
 				++cnt;
 		}
 		return cnt;
@@ -214,7 +293,7 @@ public abstract class Matrix <T extends Number>
 		int cnt = 0;
 		for (int cCol = startIndex; cCol <= stopIndex; ++cCol)
 		{
-			if (!getCell(rowIndex, cCol).equals (0))
+			if (!getCell(rowIndex, cCol).equals (getZero()))
 				++cnt;
 		}
 		return cnt;
@@ -229,7 +308,7 @@ public abstract class Matrix <T extends Number>
 		int cnt = 0;
 		for (int cRow = 0; cRow < getRows(); ++cRow)
 		{
-			if (!getCell (cRow, colIndex).equals (0))
+			if (!getCell (cRow, colIndex).equals (getZero()))
 				++cnt;
 		}
 		return cnt;
@@ -246,12 +325,12 @@ public abstract class Matrix <T extends Number>
 		int cnt = 0;
 		for (int cRow = startIndex; cRow <= stopIndex; ++cRow)
 		{
-			if (!getCell (cRow, colIndex).equals (0))
+			if (!getCell (cRow, colIndex).equals (getZero()))
 				++cnt;
 		}
 		return cnt;
 	}	
-	
+
 	/** @return number of rows **/
 	public int getRows() 
 	{
@@ -292,7 +371,7 @@ public abstract class Matrix <T extends Number>
 	 * @param compare matrix to compare dimension to
 	 * @return true if dimensions are the same
 	 */
-	public boolean dimensionEquals (Matrix<T> compare)
+	public boolean dimensionEquals (Matrix<?> compare)
 	{
 		return (this.getRows() == compare.getRows() &&
 				this.getColumns() == compare.getColumns());
@@ -306,7 +385,7 @@ public abstract class Matrix <T extends Number>
 	{
 		for (int cCol = 0; cCol < getColumns(); cCol++)
 		{
-			if (getCell (row, cCol).equals (0)) 
+			if (getCell (row, cCol).equals (getZero())) 
 				return false;
 		}
 		return true;
@@ -320,7 +399,7 @@ public abstract class Matrix <T extends Number>
 	{
 		for (int cRow = 0; cRow < getRows(); ++cRow) 
 		{
-			if (getCell (cRow, col).equals (0)) 
+			if (getCell (cRow, col).equals (getZero())) 
 				return false;
 		}
 		return true;
@@ -334,7 +413,7 @@ public abstract class Matrix <T extends Number>
 	{
 		for (int cCol = 0; cCol < getColumns(); cCol++)
 		{
-			if (!getCell (row, cCol).equals (0)) 
+			if (!getCell (row, cCol).equals (getZero())) 
 				return false;
 		}
 		return true;
@@ -348,7 +427,7 @@ public abstract class Matrix <T extends Number>
 	{
 		for (int cRow = 0; cRow < getRows(); ++cRow) 
 		{
-			if (!getCell (cRow, col).equals (0)) 
+			if (!getCell (cRow, col).equals (getZero())) 
 				return false;
 		}
 		return true;
@@ -394,14 +473,14 @@ public abstract class Matrix <T extends Number>
 	//debugging methods
 	/**
 	 * Prints the entries of the matrix using writer
-	 * @param writer stream to write to
+	 * @param out stream to write to
 	 */
-	public void print (PrintWriter writer) 
+	public void print (PrintStream out) 
 	{
 		for (int cRows = 0; cRows < getRows(); cRows++) {
 			for (int cCols = 0; cCols < getColumns(); cCols++)
-				writer.print(" " + getCell(cCols, cRows) + " ");
-			writer.println("");
+				out.print(" " + getCell(cCols, cRows) + " ");
+			out.println("");
 		}
 	}
 	
