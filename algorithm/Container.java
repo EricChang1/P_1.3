@@ -92,7 +92,9 @@ public static class Container extends Block
 		@param pos the position to place block 
 		@return true if block placed at pos remains within the container
 		The position refers to the top-left corner of the smallest possible rectangle containig the block
-	**/
+
+		 **edit: not really needed anymore :(
+		 *
 	public boolean checkPositionValid (Block block, Position pos)
 	{
 		ArrayList<Integer> position = pos.getPosition();
@@ -114,7 +116,11 @@ public static class Container extends Block
 				
 		return true;
 	}
-	
+
+		**/
+
+
+
 	/**	@param block the block object to place
 		@param pos the position to place block 
 		@return true if block placed at pos does not cause any overlapping with previously placed blocks
@@ -125,12 +131,12 @@ public static class Container extends Block
 		ArrayList<Integer> minPos = pos.getPosition();
 		Position maxDim = block.getMaxDimension(pos);
 		ArrayList<Integer> maxPos = maxDim.getPosition();
-		
-		ArrayList<Integer> lengthPos = new ArrayList<Integer>();
-		
-		int xDiff = maxPos.get(0) - minPos.get(0);
-		
-		
+
+		ArrayList<Double> l1 = new Line(minPos, maxPos);
+		for (int i=0; i<mGluedBlocks.size(); i++){
+			if (Line.doIntersect(l1, mGluedBlocks.get(i))) return false;
+		}
+		return true;
 	}
 	
 	/**	@param block the block object to place
@@ -140,9 +146,9 @@ public static class Container extends Block
 	**/
 	public boolean checkPosition (Block block, Position pos)
 	{
-		if (checkPositionValid(block, pos)) {
+		//if (checkPositionValid(block, pos)) {
 			if (checkPositionOverlap(block, pos)) return true;				
-		}
+		//}
 		return false;
 	}
 

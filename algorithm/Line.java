@@ -46,6 +46,12 @@ public class Line {
         else System.out.println("Matrices are not equal of size, therefore no Line can be constructed.");
     }
 
+    /**
+     *
+     * @param pos1 Position of point1
+     * @param pos2 Position of point2
+     * @return ArrayList<Double> containing The scaled down (length=1) version of the line (x,y,z) with the scaling factor as fourth element
+     */
     public ArrayList<Double> createLine(Position pos1, Position pos2) {
         int i = 0;
         // !! Not sure if pos.get(0) or pos.get(1) returns the first index !!
@@ -90,9 +96,13 @@ public class Line {
         return scaleDownLine;
     }
 
-
+    /**
+     * @param line1 ArrayList<Double> containing all relevant information about line1 in the correct order (10 elements)
+     * @param line2 ArrayList<Double> containing all relevant information about line2 in the correct order (10 elements)
+     * @return true: Lines do intersect -- false: they don't
+     */
     public boolean doIntersect(ArrayList<Double> line1, ArrayList<Double> line2) {
-        //Line 1
+        // Line 1
         double x1 = line1.get(0);
         double y1 = line1.get(1);
         double z1 = line1.get(2);
@@ -104,7 +114,7 @@ public class Line {
         int p2y = line1.get(9);
         int p2z = line1.get(10);
 
-        //Line 2
+        // Line 2
         double x2 = line2.get(0);
         double y2 = line2.get(1);
         double z2 = line2.get(2);
@@ -116,8 +126,18 @@ public class Line {
         int q2y = line2.get(9);
         int q2z = line2.get(10);
 
-        double r1 =
+        // Check
+        double r1 = ( (q1x + x2 - p1x) / (x1) );
+        double r2 = ( (q1y + y2 - p1y) / (y1) );
+        double r3 = ( (q1z + z2 - p1z) / (z1) );
 
+        double s1 = ( (p1x + x1 - q1x) / (x2) );
+        double s2 = ( (p1y + y1 - q1y) / (y2) );
+        double s3 = ( (p1z + z1 - q1z) / (z2) );
+
+
+        if ((r1 == s1) && (r2 == s2) && (r3 == s3)) return true;
+        else return false;
     }
 
 	private Position pos1;
