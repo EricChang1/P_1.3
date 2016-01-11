@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author martin
  * @param <T> type of entries of matrix
  */
-public abstract class Matrix <T extends Number> 
+public abstract class Matrix <T extends Number> implements Cloneable
 {
 	/**
 	 * Exception thrown when index beyond the bounds of the matrix is used to access the matrix
@@ -236,6 +236,8 @@ public abstract class Matrix <T extends Number>
 		}
 		return result;
 	}
+	
+	public abstract Matrix<T> clone();
 	
 	/**
 	 * @param row row index
