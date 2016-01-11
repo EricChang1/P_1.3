@@ -6,15 +6,13 @@ public class BasicShape {
 	public BasicShape(ArrayList<MatrixHandler<Integer>> vectors, MatrixHandler adjMatrix){
 
 		ArrayList<Integer> dimensions = new ArrayList<Integer>();
-
-		//How can this work if calcDim( ) is void?
 		this.dimensions = calcDim(vectors);
 		this.adjMatrix = adjMatrix.clone();
 
 	}
 	
 	/**
-	 * @return the dimensions of a shape given an index. (you dont say :O what is this index?)
+	 * @return the dimensions of a shape given an index.
 	 */
 	public double getDimensions(int index){
 
