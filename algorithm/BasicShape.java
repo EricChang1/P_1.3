@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 public class BasicShape {
 
+
 	public BasicShape(ArrayList<MatrixHandler<Integer>> vectors, MatrixHandler adjMatrix){
 
 		ArrayList<Integer> dimensions = new ArrayList<Integer>();
@@ -10,7 +11,8 @@ public class BasicShape {
 
 	}
 	
-	/** @return the dimensions of a shape given an index.
+	/**
+	 * @return the dimensions of a shape given an index.
 	 */
 	public double getDimensions(int index){
 
@@ -75,6 +77,10 @@ public class BasicShape {
     	return min;
 	}
 
+	/**
+	 * @param index Finds corner point in this position
+	 * @return All the points that are connected with this point
+     */
 	public Arraylist<MatrixHandler<Integer>> lookUpConnections(int index){
 
 	Arraylist<MatrixHandler<Integer>> connections = new Arraylist<MatrixHandler<Integer>>();
@@ -125,7 +131,7 @@ public class BasicShape {
 
 	}
 	
-	private ArrayList<MatrixHandler> vectors;
+	private ArrayList<Matrix> vectors;
 	private ArrayList<Integer> dimensions;
 	private MatrixHandler<Integer> adjMatrix;
 }
