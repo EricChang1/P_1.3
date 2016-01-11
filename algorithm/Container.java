@@ -1,10 +1,12 @@
 package algorithm;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
-public static class Container extends Block
+public class Container extends Block
 {
-	public class BlockNotFoundException extends IllegalArgumentException
+	@SuppressWarnings("serial")
+	public static class BlockNotFoundException extends IllegalArgumentException
 	{
 		public BlockNotFoundException () {}
 		
@@ -20,16 +22,17 @@ public static class Container extends Block
 		
 	}	
 	
-	public class WrongPositionException extends IllegalArgumentException
+	@SuppressWarnings("serial")
+	public static class WrongPositionException extends IllegalArgumentException
 	{
-		public IllegalArgumentException() {}
+		public WrongPositionException() {}
 		
-		public IllegalArgumentException(Position posFail)
+		public WrongPositionException (Position posFail)
 		{
 			super("position cant be used " + posFail.toString());
 		}
 		
-		public IllegalArgumentException(String message, Position posFail)
+		public WrongPositionException (String message, Position posFail)
 		{
 			super(message + " " + posFail.toString());
 		}
@@ -43,6 +46,7 @@ public static class Container extends Block
 	 */
 	public Container (ArrayList <Integer> dimensions)
 	{
+		//no look up documenation
 		super(dimensions, DEFAULT_VALUE);
 	}
 	
@@ -58,14 +62,13 @@ public static class Container extends Block
 	**/
 	public void placeBlock (Block block, Position pos) throws WrongPositionException
 	{
-		if (checkPositionValid(block, pos)) {
-			if (checkPositionOverlap(block, pos)) {
-				Glue glue = new Glue(pos);
+		if (checkPositionOverlap(block, pos)) {
+				Glue glue = pos.clone();
 				//Nothing implemented in glue that I could use to place the block
+				//placing is done by the container => store in hashmap
 				block.glueBlock(pos);
-
-			}
-			else throw new WrongPositionException("position overlaps", pos);
+				//@TODO edit make sure adjacency matrix is edited and list of vectors in basic shape
+				//this container inherits from
 		}
 		else throw new WrongPositionException("position is not inside of the container", pos);
 	}
@@ -133,12 +136,17 @@ public static class Container extends Block
 		ArrayList<Integer> maxPos = maxDim.getPosition();
 
 		ArrayList<Double> l1 = new Line(minPos, maxPos);
+		//doesn't work
+		//check: for every connection c1 between two vertices of block
+			//and for every connection c2 within the container (including pieces already placed)
+				//whether c1 and c2 intersect
 		for (int i=0; i<mGluedBlocks.size(); i++){
 			if (Line.doIntersect(l1, mGluedBlocks.get(i))) return false;
 		}
 		return true;
 	}
 	
+	//unnecessary
 	/**	@param block the block object to place
 		@param pos the position to place block 
 		@return true if block placed at pos remains within the container and does not cause any overlapping with previously placed blocks
@@ -154,5 +162,5 @@ public static class Container extends Block
 
 	private HashMap <Glue, Block> mGluedBlocks;
 	
-	private final int DEFAULT_VALUE;
+	private final static int DEFAULT_VALUE;
 }
