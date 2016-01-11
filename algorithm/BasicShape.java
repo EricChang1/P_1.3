@@ -1,3 +1,5 @@
+package algorithm;
+
 import java.util.ArrayList;
 
 public class BasicShape 
@@ -24,10 +26,11 @@ public class BasicShape
 	
 	/** @return the dimensions of a shape given an index.
 	 */
-	public double getDimensions(int index){
+	public int getDimensions(int index){
 
 		return dimensions.get(index);
 	}
+	
 	/** Calculates the dimensions of a shape
 	** @param vectors ArrayList containing all the vectors
 	*/
@@ -38,6 +41,7 @@ public class BasicShape
 
 		for(int i=0; i<vectors.size(); i++){
 
+
 			int max = maximum (vectors,i);
 			int min = minimum (vectors,i);
 			dimensions.add(max-min);
@@ -45,9 +49,10 @@ public class BasicShape
 		}
 	}
 	/** compares that all the Matrix Handlers have the same number of rows
-	* @param vectors Arraylist containing all the vectors
+	* @param vectors ArrayList containing all the vectors
 	* @return false if one Matrix Handler doesn't have the same number of rows
 	*/
+
 	public boolean numberOfMH(ArrayList<Matrix.IntegerMatrix> vectors){
 
 		int numberOfRows=vectors.get(0).getRows();
@@ -58,7 +63,7 @@ public class BasicShape
 		return true;
 	}
 	/** calculates the maximum vector value
-	* @param vector Arraylist containing all the vectors
+	* @param vector ArrayList containing all the vectors
 	* @param index The index of the vector in the Matrix Handler
 	* @return the maximum value.
 	*/
@@ -74,7 +79,7 @@ public class BasicShape
 
 	}
 	/** calculates the minimum vector value
-	* @param vector Arraylist containing all the vectors
+	* @param vector ArrayList containing all the vectors
 	* @param index The index of the vector in the Matrix Handler
 	* @return the minimum value.
 	*/
@@ -109,6 +114,7 @@ public class BasicShape
 		double radAngle1 = Math.toRadians (angle1);
 		double radAngle2 = Math.toRadians (angle2);
 
+
 		Matrix <Double> rotationMatrix1 = new Matrix.DoubleMatrix (3, 3);
 		rotationMatrix1.setCell (0, 0, Math.cos (radAngle1));
 		rotationMatrix1.setCell (1, 0, Math.sin (radAngle1));
@@ -138,7 +144,7 @@ public class BasicShape
 			rotMatrix.multiply (vec, result);
 			vectors.set (cCounter, result.toIntegerMatrix());
 		}
-
+		
 	}
 	
 	private ArrayList<Matrix.IntegerMatrix> vectors;

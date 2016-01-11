@@ -1,3 +1,4 @@
+package algorithm;
 
 import java.util.ArrayList;
 import java.util.EmptyStackException;
@@ -10,14 +11,13 @@ public class Position extends Glue{
 	public Position(ArrayList<Integer> position){
 		super(position);
 	}
+	
 	/**
 	 * @param pos ArrayList with three values inside (otherwise: exception throwed)
 	 */
-	public void setPosition(ArrayList<Integer> pos) {
-		pPosition = pos;
-			this.x = (int) pPosition.get(0);
-			this.y = (int) pPosition.get(1);
-			this.z = (int) pPosition.get(2);
+	public void setPosition(ArrayList<Integer> pos) 
+	{
+		pPosition = (ArrayList<Integer>) pos.clone();
 	}
 	
 	/**
