@@ -1,148 +1,134 @@
-import java.util.ArrayList;
+package algorithm;
 
-public class Line {
+import algorithm.Matrix.*;
 
-    /**
-	 * @param pos2 Position
-	 * Constructs a default line between 0,0,0 and pos2
-	 */
-	public Line(ArrayList<Integer> pos2) {
-		this.pos1 = new Position();
-		this.pos2 = new Position(pos2);
-        this.line = createLine(pos1, pos2);
+/**
+ * class modelling a line
+ * @author martin
+ */
+public class Line 
+{
+	
+	public static class LineDimensionMismatchException extends IllegalArgumentException
+	{
+		public LineDimensionMismatchException () {}
+		
+		public LineDimensionMismatchException (String message) { super (message); }
 	}
 	
 	/**
-	 * @param pos1 First position
-	 * @param pos2 Second position
-	 * Constructs a line between pos1 and pos2
+	 * scales down v to length 1
+	 * @param v vector given
+	 * @return v scaled to length 1
 	 */
-	public Line(ArrayList<Integer> pos1, ArrayList<Integer> pos2) {
-		this.pos1 = new Position(pos1);
-		this.pos2 = new Position(pos2);
-        this.line = createLine(pos1, pos2);
+	public static DoubleMatrix normVector (DoubleMatrix v)
+	{
+		DoubleMatrix normedV = v.clone();
+		double length = Math.sqrt (v.vectorProduct (v.getColumn(0), v.getColumn(0)));
+		for (int cRow = 0; cRow < v.getRows(); ++cRow)
+			normedV.setCell (cRow, 0, v.getCell (cRow, 0) / length);
+		return normedV;
 	}
+	
+	/**
+	 * Calculates parameter s for equation
+	 * p1 + r*v1 = p2 + s * v2
+	 * @param p1 start point of line 1
+	 * @param p2 start point of line 2
+	 * @param v1 vector defining line 1
+	 * @param v2 vector defining line 2
+	 * @param ind1 dimension index 1
+	 * @param ind2 dimension index 2
+	 * @return
+	 */
+	public static double calcLineIntersectParam (Glue p1, Glue p2, DoubleMatrix v1, DoubleMatrix v2, int ind1, int ind2)
+	{
+		double numSum1 = v1.getCell(ind1, 0) * (p1.getPosition().get(ind2) - p2.getPosition().get(ind2));
+		double numSum2 = v1.getCell(ind2, 0) * (p2.getPosition().get(ind1) - p1.getPosition().get(ind1));
+		double denom = v2.getCell(ind2, 0) * v1.getCell (ind1, 0) - v2.getCell(ind1, 0) * v1.getCell(ind2, 0);
+		return ((numSum1 + numSum2) / denom);
+	}
+	
+	/**
+	 * Checks whether two floating types are equal, using a static epsilon
+	 * @param d1 float 1
+	 * @param d2 float 2
+	 * @return whether float 1 == float 2
+	 */
+	public static boolean floatEquals (double d1, double d2)
+	{
+		double e = 0.00001;
+		return (d1 - d2 >= -e && d1 - d2 <= e);
+	}
+	
+	/**
+	 * constructs line defined between p1 and p2
+	 * @param p1 start point of the line
+	 * @param p2 end point of the line
+	 */
+	public Line (Glue p1, Glue p2)
+	{
+		mP1 = p1.clone();
+		mP2 = p2.clone();
+		mNormedLineVector = new DoubleMatrix (mP1.getDimension(), 1);
+		for (int cCoord = 0; cCoord < mP1.getDimension(); ++cCoord)
+			mNormedLineVector.setCell (cCoord, 0, (double)p1.getPosition().get(cCoord) - (double)p2.getPosition().get (cCoord));
+		mNormedLineVector = normVector (mNormedLineVector);
+	}
+	
+	
+	public boolean doIntersect (Line l2)
+	{
+		double delta = 0.00001;
+		if (l2.mP1.getDimension() != this.mP1.getDimension())
+			throw new LineDimensionMismatchException ("l2 does not have same dimension");
+		
+		//for begin points p1, p2 belonging to two different lines
+		//for vectors v1, v2 belonging to two different lines this needs to hold
+		//p1 + r * v1 = p2 + s * v2
+		//for every dimension index x, y, s and r need to be the same (it is sufficient to check 1)
+		//s = (v1(x)(p2(y) - p1(y)) - v1(y)(p2(x) - p1(x))) / v2(y)v1(x) - v2(x)v1(y)
 
-    /**
-     * Constructs a line between two matrix objects
-     * @param m1 Matrix1
-     * @param m2 Matrix2
-     */
-    public Line(Matrix m1, Matrix m2){
-        if ((m1.getColumns() == 1) && (m2.getColumns() == 1)) {
-            if ((m1.getRows() == 3) && (m2.getRows() ==3)) {
-                ArrayList<Integer> matrix1 = new ArrayList<Integer>();
-                ArrayList<Integer> matrix2 = new ArrayList<Integer>();
-                for (int i=0; i<m1.getRows(); i++) {
-                    Int[] m1 = m1.getRow(i);
-                    Int[] m2 = m2.getRow(i);
-                    matrix1.add(m1[0]);
-                    matrix2.add(m2[0]);
-                }
-                new Line(matrix1, matrix2);
-            }
-            else System.out.println("Matrices are not equal of size, therefore no Line can be constructed.");
-        }
-        else System.out.println("Matrices are not equal of size, therefore no Line can be constructed.");
-    }
-
-    /**
-     *
-     * @param pos1 Position of point1
-     * @param pos2 Position of point2
-     * @return ArrayList<Double> containing The scaled down (length=1) version of the line (x,y,z) with the scaling factor as fourth element
-     */
-    public ArrayList<Double> createLine(Position pos1, Position pos2) {
-        int i = 0;
-        // !! Not sure if pos.get(0) or pos.get(1) returns the first index !!
-        int x2 = pos2.get(++i);
-        int x1 = pos1.get(i);
-        int y2 = pos2.get(++i);
-        int y1 = pos1.get(i);
-        int z2 = pos2.get(++i);
-        int z1 = pos1.get(i);
-
-        int x = x2 - x1;
-        int y = y2 - y1;
-        int z = z2 - z1;
-
-        double length = Math.sqr((x*x)+(y*y)+(z*z));
-        ArrayList<Double> scaleDownLine = ArrayList<Double>();
-
-        if (length != 1) {
-            double scaleDownX = (x/length);
-            double scaleDownY = (y/length);
-            double scaleDownZ = (z/length);
-            scaleDownLine.add(scaleDownX);
-            scaleDownLine.add(scaleDownY);
-            scaleDownLine.add(scaleDownZ);
-            scaleDownLine.add(length);
-        }
-        else {
-            scaleDownLine.add(x);
-            scaleDownLine.add(y);
-            scaleDownLine.add(z);
-            scaleDownLine.add(1);
-        }
-
-        scaleDownLine.add(x1);
-        scaleDownLine.add(y1);
-        scaleDownLine.add(z1);
-        scaleDownLine.add(x2);
-        scaleDownLine.add(y2);
-        scaleDownLine.add(z2);
-
-
-        return scaleDownLine;
-    }
-
-    /**
-     * @param line1 ArrayList<Double> containing all relevant information about line1 in the correct order (10 elements)
-     * @param line2 ArrayList<Double> containing all relevant information about line2 in the correct order (10 elements)
-     * @return true: Lines do intersect -- false: they don't
-     */
-    public boolean doIntersect(ArrayList<Double> line1, ArrayList<Double> line2) {
-        // Line 1
-        double x1 = line1.get(0);
-        double y1 = line1.get(1);
-        double z1 = line1.get(2);
-        double scale1 = line1.get(3);
-        int p1x = line1.get(5);
-        int p1y = line1.get(6);
-        int p1z = line1.get(7);
-        int p2x = line1.get(8);
-        int p2y = line1.get(9);
-        int p2z = line1.get(10);
-
-        // Line 2
-        double x2 = line2.get(0);
-        double y2 = line2.get(1);
-        double z2 = line2.get(2);
-        double scale2 = line2.get(3);
-        int q1x = line2.get(5);
-        int q1y = line2.get(6);
-        int q1z = line2.get(7);
-        int q2x = line2.get(8);
-        int q2y = line2.get(9);
-        int q2z = line2.get(10);
-
-        // Check
-        double r1 = ( (q1x + x2 - p1x) / (x1) );
-        double r2 = ( (q1y + y2 - p1y) / (y1) );
-        double r3 = ( (q1z + z2 - p1z) / (z1) );
-
-        double s1 = ( (p1x + x1 - q1x) / (x2) );
-        double s2 = ( (p1y + y1 - q1y) / (y2) );
-        double s3 = ( (p1z + z1 - q1z) / (z2) );
-
-
-        if ((r1 == s1) && (r2 == s2) && (r3 == s3)) return true;
-        else return false;
-    }
-
-	private Position pos1;
-	private Position pos2;
-
-    // Stores x, y, z, scaling factor, P1 (x,y,z), P2 (x,y,z) --> 10 elements in this order
-    private ArrayList<Double> line;
+		double s = 0.0;
+		for (int cCoord = 1; cCoord < mP1.getDimension(); ++cCoord)
+		{
+			double testS = calcLineIntersectParam(this.mP1, l2.mP1, this.mNormedLineVector, l2.mNormedLineVector, 0, cCoord);
+			if (cCoord == 1)
+				s = testS;
+			else if (!floatEquals (s, testS))
+				return false;
+		}
+		if (!l2.isScalarOnLine (s))
+			return false;
+		
+		//calculate parameter r using parameter s
+		double r = l2.mP1.getPosition().get(0) + s * l2.mNormedLineVector.getCell(0, 0);
+		r -= this.mP1.getPosition().get(0);
+		r /= this.mNormedLineVector.getCell(0, 0);
+		if (!this.isScalarOnLine(r))
+			return false;
+		
+		return true;
+	}
+	
+	/**
+	 * @param scalar scalar of normed vector in line
+	 * @return true if mP1 + mNormedLineVector * scalar <= mP2
+	 */
+	public boolean isScalarOnLine (double scalar)
+	{
+		for (int cDim = 0; cDim < mP1.getDimension(); ++cDim)
+		{
+			double coord = (double)mP1.getPosition().get(cDim) + mNormedLineVector.getCell(cDim, 0) * scalar;
+			if (mP1.getPosition().get(cDim) < mP2.getPosition().get(cDim) && coord > mP2.getPosition().get(cDim))
+				return false;
+			if (mP1.getPosition().get(cDim) > mP2.getPosition().get(cDim) && coord < mP2.getPosition().get(cDim))
+				return false;
+		}
+		return true;
+	}
+	
+	
+	private Glue mP1, mP2;
+	private DoubleMatrix mNormedLineVector;
 }
