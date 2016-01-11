@@ -1,30 +1,30 @@
 package algorithm;
 
 import java.util.ArrayList;
-import algorithm.Matrix.*;
 
 public class BasicShape 
 {
-	public final static int DIM = 3;
-	
-	@SuppressWarnings("serial")
- 	public static class BadNumberOfRowsException extends IllegalArgumentException
- 	{
- 		public BadNumberOfRowsException() {super(); }
- 		
- 		public BadNumberOfRowsException (String message) { super (message); }
- 	}
-
-	public BasicShape(ArrayList<IntegerMatrix> vectors, IntegerMatrix adjMatrix){
-
-		ArrayList<Integer> dimensions = new ArrayList<Integer>();
-		calcDim(vectors);
-		this.adjMatrix = adjMatrix.clone();
-
+	public static class BadNumberOfRowsException extends IllegalArgumentException
+	{
+		public BadNumberOfRowsException() {super(); }
+		
+		public BadNumberOfRowsException (String message) { super (message); }
 	}
 	
-	/**
-	 * @return the dimensions of a shape given an index.
+	
+	public BasicShape(ArrayList <Matrix.IntegerMatrix> vectors, Matrix.IntegerMatrix adjMatrix){
+
+		dimensions = new ArrayList<Integer>();
+		calcDim (vectors);
+		this.adjMatrix = adjMatrix.clone();
+	}
+	
+	public BasicShape (BasicShape clone)
+	{
+		this (clone.vectors, clone.adjMatrix);
+	}
+	
+	/** @return the dimensions of a shape given an index.
 	 */
 	public int getDimensions(int index){
 
@@ -34,16 +34,17 @@ public class BasicShape
 	/** Calculates the dimensions of a shape
 	** @param vectors ArrayList containing all the vectors
 	*/
-	public void calcDim(ArrayList<IntegerMatrix> vectors){
+	public void calcDim(ArrayList<Matrix.IntegerMatrix> vectors) throws BadNumberOfRowsException{
 		
 		if (!numberOfMH(vectors)) 
-			throw new BadNumberOfRowsException ("Vectors given to construct basic shape have different dimensions");
+			throw new BadNumberOfRowsException ("vectors don't have the same dimension");
 
-			for(int i=0; i<vectors.size(); i++){
+		for(int i=0; i<vectors.size(); i++){
 
-				int max = maximum(vectors,i);
-				int min = minimum(vectors,i);
-				dimensions.add(max-min);
+
+			int max = maximum (vectors,i);
+			int min = minimum (vectors,i);
+			dimensions.add(max-min);
 
 		}
 	}
@@ -51,12 +52,12 @@ public class BasicShape
 	* @param vectors ArrayList containing all the vectors
 	* @return false if one Matrix Handler doesn't have the same number of rows
 	*/
-	public boolean numberOfMH(ArrayList<IntegerMatrix> vectors){
+
+	public boolean numberOfMH(ArrayList<Matrix.IntegerMatrix> vectors){
 
 		int numberOfRows=vectors.get(0).getRows();
-		for (int cVec = 0; cVec < vectors.size(); ++cVec)
-		{
-			if (vectors.get(cVec).getRows() != numberOfRows)
+		for(Matrix<Integer> temp: vectors){
+			if(temp.getRows() != numberOfRows)
 				return false;
 		}
 		return true;
@@ -66,15 +67,14 @@ public class BasicShape
 	* @param index The index of the vector in the Matrix Handler
 	* @return the maximum value.
 	*/
-	public int maximum(ArrayList<IntegerMatrix> vectors, int index){
+	public int maximum(ArrayList <Matrix.IntegerMatrix> vectors, int index){
 
 		int max = Integer.MIN_VALUE;
-		for (int cVec = 0; cVec < vectors.size(); ++cVec)
-		{
-	   		if (vectors.get(cVec).getCell (index, 0) > max){
-	      		  max = vectors.get(cVec).getCell (index, 0);
-	   		}
-		}
+    	for(Matrix<Integer> temp : vectors){
+       		if(temp.getCell (index, 0) > max){
+          		  max = temp.getCell (index, 0);
+       		}
+   		}
     	return max;
 
 	}
@@ -83,29 +83,24 @@ public class BasicShape
 	* @param index The index of the vector in the Matrix Handler
 	* @return the minimum value.
 	*/
-	public int minimum(ArrayList<IntegerMatrix> vectors, int index)
-	{
+	public int minimum(ArrayList<Matrix.IntegerMatrix> vectors, int index){
+
 		int min = Integer.MAX_VALUE;
-    	for (int cVec = 0; cVec < vectors.size(); ++cVec)
-    	{
-       		if (vectors.get(cVec).getCell (index, 0) < min){
-          		  min = vectors.get(cVec).getCell (index, 0);
+    	for(Matrix<Integer> temp: vectors){
+       		if(temp.getCell (index, 0) < min){
+          		  min= temp.getCell (index, 0);
        		}
    		}
     	return min;
 	}
 
-	/**
-	 * @param index Finds corner point in this position
-	 * @return All the points that are connected with this point
-     */
-	public ArrayList<IntegerMatrix> lookUpConnections(int index)
-	{
-		ArrayList<IntegerMatrix> connections = new ArrayList<IntegerMatrix>();
+	public ArrayList <Matrix.IntegerMatrix> lookUpConnections(int index){
+
+		ArrayList<Matrix.IntegerMatrix> connections = new ArrayList<Matrix.IntegerMatrix>();
 		for(int counter=0; counter<adjMatrix.getRows(); counter++){
 			if(adjMatrix.getCell(index,counter)!=0){
-					connections.add(vectors.get(counter));
-				}
+					connections.add (vectors.get(counter));
+			}
 		}
 		return connections;
 	}
@@ -119,43 +114,40 @@ public class BasicShape
 		double radAngle1 = Math.toRadians (angle1);
 		double radAngle2 = Math.toRadians (angle2);
 
-		Matrix <Double> rotationMatrix1 = new DoubleMatrix (DIM, DIM);
+
+		Matrix <Double> rotationMatrix1 = new Matrix.DoubleMatrix (3, 3);
 		rotationMatrix1.setCell (0, 0, Math.cos (radAngle1));
 		rotationMatrix1.setCell (1, 0, Math.sin (radAngle1));
 		rotationMatrix1.setCell (0, 1, -Math.sin (radAngle1));
 		rotationMatrix1.setCell (1, 1, -Math.cos (radAngle1));
 		rotationMatrix1.setCell (2, 2, 1.0);
 
-		Matrix <Double> rotationMatrix2 = new DoubleMatrix (DIM, DIM);
+		Matrix <Double> rotationMatrix2 = new Matrix.DoubleMatrix (3, 3);
 		rotationMatrix2.setCell (0, 0, Math.cos (radAngle2));
 		rotationMatrix2.setCell (1, 0, -Math.sin (radAngle2));
 		rotationMatrix2.setCell (0, 1, 1.0);
 		rotationMatrix2.setCell (1, 1, Math.sin (radAngle2));
 		rotationMatrix2.setCell (2, 2, Math.cos (radAngle2));
-		
-		Matrix <Double> result = new DoubleMatrix (DIM, DIM);
-		return rotationMatrix1.multiply (rotationMatrix2, result);
 
+		return rotationMatrix1.multiply (rotationMatrix2, new Matrix.DoubleMatrix (3, 3));
 	}
 	
 	/** Performs actual rotation
 	 * @param rotMatrix created from rotationMatrix()
 	 * @return matrix after rotation
 	 */
-	public void rotate(Matrix<Double> rotMatrix)
-	{
+	public void rotate (Matrix<Double> rotMatrix){
 
-		for(int cCounter=0; cCounter<vectors.size();cCounter++)
-		{
-			DoubleMatrix result = new DoubleMatrix (DIM, DIM);
-			DoubleMatrix vec = vectors.get (cCounter).toDoubleMatrix();
+		for(int cCounter=0; cCounter<vectors.size();cCounter++){
+			Matrix.DoubleMatrix result = new Matrix.DoubleMatrix (3,1);
+			Matrix <Double> vec = vectors.get(cCounter).toDoubleMatrix();
 			rotMatrix.multiply (vec, result);
 			vectors.set (cCounter, result.toIntegerMatrix());
 		}
 		
 	}
 	
-	private ArrayList<IntegerMatrix> vectors;
+	private ArrayList<Matrix.IntegerMatrix> vectors;
 	private ArrayList<Integer> dimensions;
-	private IntegerMatrix adjMatrix;
+	private Matrix.IntegerMatrix adjMatrix;
 }

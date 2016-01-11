@@ -7,13 +7,6 @@ public class Position extends Glue{
 	/** 
 	 * Default constructor that constructs a Position(0,0,0) 
 	 */
-	public Position() {
-		super();
-	}
-	/**
-	 * @param position
-	 * Constructs position
-     */
 	public Position(ArrayList<Integer> position){
 		super(position);
 	}
