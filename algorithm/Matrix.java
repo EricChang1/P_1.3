@@ -1,8 +1,6 @@
 package algorithm;
 
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Class modeling a generic matrix
@@ -64,7 +62,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		public IntegerMatrix clone()
 		{
 			IntegerMatrix clone = new IntegerMatrix(getRows(), getColumns());
-			clone.copyValues(this, 0, 0);
+			clone.copyValues(this, 0, 0, 0, 0, clone.getRows(), clone.getColumns());
 			return clone;
 		}
 		
@@ -142,7 +140,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		public DoubleMatrix clone()
 		{
 			DoubleMatrix clone = new DoubleMatrix(getRows(), getColumns());
-			clone.copyValues(this, 0, 0);
+			clone.copyValues(this, 0, 0, 0, 0, clone.getRows(), clone.getColumns());
 			return clone;
 		}
 		
@@ -228,9 +226,9 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cRow = 0; cRow < this.getRows(); ++cRow)
 		{
-			for (int cCol = 0; cCol < this.getColumns(); ++cCol)
+			for (int cCol = 0; cCol < multiplier.getColumns(); ++cCol)
 			{
-				T resultCell = vectorProduct (this.getRow(cRow), this.getColumn(cCol));
+				T resultCell = vectorProduct (this.getRow(cRow), multiplier.getColumn(cCol));
 				result.setCell(cRow, cCol, resultCell);
 			}
 		}
@@ -447,20 +445,25 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		mStoreArray[row][col] = value;
 	}
 	
-	/** Copies values from source to this matrix starting from startRow|startCol
+	/**Copies values from source to this matrix starting from startRow|startCol
 	 * Precondition: source contains enough entries to fill every cell of this matrix while copying
 	 * @param source matrix containing values to be copied
-	 * @param startRow row in source to start copying at
-	 * @param startCol column in source to start copying at
+	 * @param startRow row in this to start copying at
+	 * @param startCol column in this to start copying at
+	 * @param srcStartRow row in source to start copying at
+	 * @param srcStartCol column in source to start copying at
+	 * @param copyRows number of rows to copy
+	 * @param copyCols number of columns to copy
 	 */
-	public void copyValues (Matrix<T> source, int startRow, int startCol)
+	public void copyValues (Matrix<T> source, int startRow, int startCol, int srcStartRow, int srcStartCol, int copyRows, int copyCols)
 	{
-		for (int cRow = 0; cRow < getRows(); ++cRow)
+		for (int cRow = 0; cRow < copyRows; ++cRow)
 		{
-			for (int cCol = 0; cCol < getColumns(); ++cCol)
-				this.setCell(cRow, cCol, source.getCell (cRow + startRow, cCol + startCol));
+			for (int cCol = 0; cCol < copyCols; ++cCol)
+				this.setCell(cRow + startRow, cCol + startCol, source.getCell (cRow + srcStartRow, cCol + srcStartCol));
 		}
 	}
+	
 	
 	/**
 	 * @param index of row the line above will be moved to. Precondition: Row > 0
@@ -481,7 +484,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cRows = 0; cRows < getRows(); cRows++) {
 			for (int cCols = 0; cCols < getColumns(); cCols++)
-				out.print(" " + getCell(cCols, cRows) + " ");
+				out.print(" " + getCell(cRows, cCols) + " ");
 			out.println("");
 		}
 	}

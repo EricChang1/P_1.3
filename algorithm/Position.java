@@ -2,14 +2,20 @@ package algorithm;
 
 import java.util.ArrayList;
 import java.util.EmptyStackException;
+import algorithm.Matrix.*;
 
-public class Position extends Glue{
-
+public class Position extends Glue
+{
 	/** 
 	 * Default constructor that constructs a Position(0,0,0) 
 	 */
 	public Position(ArrayList<Integer> position){
 		super(position);
+	}
+	
+	public Position (IntegerMatrix vec)
+	{
+		super(vec);
 	}
 	
 	/**

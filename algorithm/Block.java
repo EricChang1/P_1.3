@@ -1,38 +1,37 @@
-public class Block extends BasicShape {
+package algorithm;
+
+import java.util.ArrayList;
+
+import algorithm.Matrix.*;
+
+public class Block extends BasicShape implements Cloneable {
 	
 	/**
 	*Constructor to pass the matrix handler vectors and the value.
-	*@param matrixHVectors Arraylist containing the matrix handler vectors.
-	*@param value Value assigned to the shape.
+	*@param matrixHVectors Arraylist containing the vectors defining the shape
+	*@param adjMat adjacency matrix of block 
+	*@param value Value assigned to the block.
 	*/
-	public Block(ArrayList<MatrixHandler> matrixHVectors, double value){
-		
+	public Block (ArrayList<IntegerMatrix> matrixHVectors, IntegerMatrix adjMat, double value)
+	{
+		super (matrixHVectors, adjMat);
 	}
 	/**
 	*Constructor to pass the value with the BasicShape object
 	*@param value Value assigned to the shape
 	*@param bShape Object of BasicShape
 	*/
-	public Block(double value, BasicShape bShape){
-
+	public Block(BasicShape bShape, double value)
+	{
+		super (bShape);
 	}
-
+	
 	/**
-	 * @param minPos the position at which this blocks upper left corner is sitting
-	 * @return the maxPos, which is equivalent to the position of the bottom right corner
-     */
-	public Position getMaxDimension(Position minPos) {
-
-		//needs to get passed an index, but idk what that should be so maybe I dont use it correctly
-		int x = this.getDimensions(0) + minPos.get(0);
-		int y = this.getDimensions(1) + minPos.get(1);
-		int z = this.getDimensions(2) + minPos.get(2);
-		ArrayList<Integer> maxPos = new ArrayList<Integer>();
-		maxPos.add(x);
-		maxPos.add(y);
-		maxPos.add(z);
-		Position max = new Position(maxPos);
-		return max;
+	 * @return newly constructed Block
+	 */
+	public Block clone()
+	{
+		return new Block (this, getValue());
 	}
 
 	/**
@@ -42,7 +41,12 @@ public class Block extends BasicShape {
 	public double getValue(){
 		return value;
 	}
+	
+	public void addShape (Block b)
+	{
+		this.value += b.getValue();
+		super.addShape(b);
+	}
 
-	protected double value;
-	private BasicShape shape;
+	private double value;
 }
