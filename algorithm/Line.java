@@ -79,7 +79,6 @@ public class Line
 	
 	public boolean doIntersect (Line l2)
 	{
-		double delta = 0.00001;
 		if (l2.mP1.getDimension() != this.mP1.getDimension())
 			throw new LineDimensionMismatchException ("l2 does not have same dimension");
 		
@@ -109,6 +108,15 @@ public class Line
 			return false;
 		
 		return true;
+	}
+	
+	/**
+	 * @param l2 line to compare orientation with
+	 * @return true if this and l2 are paralell (or possibly identical
+	 */
+	public boolean isSameOrientation (Line l2)
+	{
+		return this.mNormedLineVector.equals (l2.mNormedLineVector);
 	}
 	
 	/**
