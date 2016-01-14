@@ -73,7 +73,7 @@ public class Line
 		mP2 = p2.clone();
 		mNormedLineVector = new DoubleMatrix (mP1.getDimension(), 1);
 		for (int cCoord = 0; cCoord < mP1.getDimension(); ++cCoord)
-			mNormedLineVector.setCell (cCoord, 0, (double)p1.getPosition().get(cCoord) - (double)p2.getPosition().get (cCoord));
+			mNormedLineVector.setCell (cCoord, 0, (double)p2.getPosition().get(cCoord) - (double)p1.getPosition().get (cCoord));
 		mNormedLineVector = normVector (mNormedLineVector);
 	}
 	
@@ -104,15 +104,31 @@ public class Line
 		//for every dimension index x, y, s and r need to be the same (it is sufficient to check 1)
 		//s = (v1(x)(p2(y) - p1(y)) - v1(y)(p2(x) - p1(x))) / v2(y)v1(x) - v2(x)v1(y)
 
-		double s = 0.0;
+		double s = Double.MAX_VALUE;
 		for (int cCoord = 1; cCoord < mP1.getDimension(); ++cCoord)
 		{
-			double testS = calcLineIntersectParam(this.mP1, l2.mP1, this.mNormedLineVector, l2.mNormedLineVector, 0, cCoord);
-			if (cCoord == 1)
-				s = testS;
-			else if (!floatEquals (s, testS))
-				return false;
+			if (this.mNormedLineVector.getCell (cCoord, 0) != 0 || l2.mNormedLineVector.getCell(cCoord, 0) != 0)
+			{
+				double testS = calcLineIntersectParam(this.mP1, l2.mP1, this.mNormedLineVector, l2.mNormedLineVector, 0, cCoord);
+				if (s == Double.MAX_VALUE)
+					s = testS;
+				else if (!floatEquals (s, testS))
+					return false;
+			}
+			//if vector entries are 0
+			else
+			{
+				int l1p1 = Math.min(this.mP1.getPosition().get(cCoord), this.mP2.getPosition().get(cCoord));
+				int l1p2 = Math.max(this.mP1.getPosition().get(cCoord), this.mP2.getPosition().get(cCoord));
+				int l2p1 = Math.min(l2.mP1.getPosition().get(cCoord), l2.mP2.getPosition().get(cCoord));
+				int l2p2 = Math.max(l2.mP1.getPosition().get(cCoord), l2.mP2.getPosition().get(cCoord));
+				if (!((l1p1 >= l2p1 && l1p1 <= l2p2) || (l2p1 >= l1p1 && l2p1 <= l1p2)))
+					return false;	
+			}
 		}
+		if (s == Double.MAX_VALUE)
+			return true;
+		
 		if (!l2.isScalarOnLine (s))
 			return false;
 		
@@ -132,7 +148,10 @@ public class Line
 	 */
 	public boolean isSameOrientation (Line l2)
 	{
-		return this.mNormedLineVector.equals (l2.mNormedLineVector);
+		DoubleMatrix neg = new DoubleMatrix(mNormedLineVector.getRows(), 1);
+		for (int cRow = 0; cRow < mNormedLineVector.getRows(); ++cRow)
+			neg.setCell(cRow, 0, -mNormedLineVector.getCell (cRow, 0));
+		return (this.mNormedLineVector.equals (l2.mNormedLineVector) || neg.equals(l2.mNormedLineVector));
 	}
 	
 	/**
@@ -146,9 +165,9 @@ public class Line
 		for (int cDim = 0; cDim < mP1.getDimension(); ++cDim)
 		{
 			double coord = (double)mP1.getPosition().get(cDim) + mNormedLineVector.getCell(cDim, 0) * scalar;
-			if (mP1.getPosition().get(cDim) < mP2.getPosition().get(cDim) && coord >= mP2.getPosition().get(cDim))
+			if (mP1.getPosition().get(cDim) <= mP2.getPosition().get(cDim) && coord > mP2.getPosition().get(cDim))
 				return false;
-			if (mP1.getPosition().get(cDim) > mP2.getPosition().get(cDim) && coord <= mP2.getPosition().get(cDim))
+			if (mP1.getPosition().get(cDim) >= mP2.getPosition().get(cDim) && coord < mP2.getPosition().get(cDim))
 				return false;
 		}
 		return true;
