@@ -2,6 +2,8 @@ package algorithm;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import algorithm.Matrix.*;
+
 
 public class Container extends Block
 {
@@ -37,40 +39,99 @@ public class Container extends Block
 			super(message + " " + posFail.toString());
 		}
 	}
-
-	
 	
 	/**
-	 * @param dimensions Length of the container in the three directions
-	 * Calls the Block constructor with the default_value of 0
+	 * @param d depth of container
+	 * @param w width of container
+	 * @param h height of container
+	 * @return list of vectors defining a cuboid container of given d, w, h
 	 */
-	public Container (ArrayList <Integer> dimensions)
+	public static ArrayList <IntegerMatrix> computeInitDimVectors (int d, int w, int h)
 	{
-		//no look up documenation
-		super(dimensions, DEFAULT_VALUE);
+		ArrayList <IntegerMatrix> vecs = new ArrayList<Matrix.IntegerMatrix>();
+		IntegerMatrix vec = null;
+		for (int cVertex = 0; cVertex < 8; ++cVertex)
+		{
+			vec = new IntegerMatrix(3, 1);
+			if (cVertex > 3)
+				vec.setCell(0, 0, d);
+			if (cVertex % 4 == 2 || cVertex % 4 == 3)
+				vec.setCell(1, 0, w);
+			if (cVertex % 2 == 1)
+				vec.setCell(2, 0, h);
+			vecs.add (vec);
+		}
+		return vecs;
 	}
 	
+	/**
+	 * constructs an adjacency matrix for verts for a cuboid container
+	 * @param verts set of vectors in the same dimension
+	 * @return adjacency matrix for verts
+	 */
+	public static IntegerMatrix computeInitAdjacencyMatrix (ArrayList <IntegerMatrix> verts)
+	{
+		IntegerMatrix adj = new IntegerMatrix (verts.size(), verts.size());
+		for (int cVertex = 0; cVertex < verts.size(); ++cVertex)
+		{
+			for (int cConnect = 0; cConnect < verts.size(); ++cConnect)
+			{
+				if (cVertex != cConnect)
+				{
+					int cSame = 0, cDiff = 0;
+					for (int cCoord = 0; cCoord < verts.get(cVertex).getRows(); ++cCoord)
+					{
+						if (verts.get(cVertex).getCell(cCoord, 0).equals(verts.get(cConnect).getCell (cCoord, 0)))
+							++cSame;
+						else
+							++cDiff;
+					}
+					if (cSame == 2 && cDiff == 1)
+					{
+						adj.setCell(cVertex, cConnect, 1);
+						adj.setCell(cConnect, cVertex, 1);
+					}
+				}
+			}
+		}
+		return adj;
+	}
 	
+	/**
+	 * @param d given depth
+	 * @param w given width
+	 * @param h given height
+	 * @return cuboid basic shape of d x w x h
+	 */
+	public static BasicShape constructInitShape (int d, int w, int h)
+	{
+		ArrayList <IntegerMatrix> vertices = computeInitDimVectors(d, w, h);
+		IntegerMatrix adjMat = computeInitAdjacencyMatrix(vertices);
+		return new BasicShape(vertices, adjMat);
+	}
+	
+	/**
+	 * @param dimensions depth, width, height (x1,x2,x3) of the container
+	 * Calls the Block constructor with the default_value of 0
+	 */
+	public Container (int d, int w, int h)
+	{
+		super(constructInitShape (d, w, h), 0);
+	}
 	
 	/**	Places a block at the specified position
 		@param block the block object to place
 		@param pos the position to place block 
 		Precondition: block is placeable at position
 		Postcondition: Container will contain block at pos if pos does not refer to another block already placed
-		@throws WrongPositionException
-		The position refers to the top-left corner of the smallest possible rectangle containig the block
+		The position refers to the uppermost top-left corner of the smallest possible cuboid containing the block
 	**/
 	public void placeBlock (Block block, Position pos) throws WrongPositionException
 	{
-		if (checkPositionOverlap(block, pos)) {
-				Glue glue = pos.clone();
-				//Nothing implemented in glue that I could use to place the block
-				//placing is done by the container => store in hashmap
-				block.glueBlock(pos);
-				//@TODO edit make sure adjacency matrix is edited and list of vectors in basic shape
-				//this container inherits from
-		}
-		else throw new WrongPositionException("position is not inside of the container", pos);
+		Glue glue = pos.clone();
+		mGluedBlocks.put(glue, block);
+		addShape(block);
+		//@TODO keep track of volume of placed blocks
 	}
 	
 	/** @param pos Position queried block is at
@@ -79,51 +140,19 @@ public class Container extends Block
 	**/
 	public Block getBlockAt (Position pos) throws BlockNotFoundException
 	{
-		if (Block.getValue(pos) != 0) {
-			return Block.getValue(pos);
-		}
-		else throw BockNotFoundException(pos);
+		if (mGluedBlocks.containsKey(pos))
+			return mGluedBlocks.get(pos);
+		else 
+			throw new BlockNotFoundException ("There is no block at" + pos);
 	}
 	
 	/** @return a string representation of the container**/
 	public String toString()
 	{
-		return "Height: " + this.getHeight() + ", width: " + this.getWidth() + " glues at: " + this.mGluedBlocks;
+		//return "Height: " + getDimensions(0) + ",\n width: " + getDimensions(1) + "\nglues at: " + this.mGluedBlocks;
+		return "container with " + mGluedBlocks.size() + " blocks";
 	}
 	
-	/**	@param block the block object to place
-		@param pos the position to place block 
-		@return true if block placed at pos remains within the container
-		The position refers to the top-left corner of the smallest possible rectangle containig the block
-
-		 **edit: not really needed anymore :(
-		 *
-	public boolean checkPositionValid (Block block, Position pos)
-	{
-		ArrayList<Integer> position = pos.getPosition();
-			
-		//First check: Is pos (equivalent to minPos) inside the borders of this container?
-		for (int i=0; i<position.length; i++) {
-			int minDim = position.get(i);
-			if ((minDim < 0) || (minDim > this.getDimension(i))) return false;
-		}
-		
-		Position maxDim = block.getMaxDimension(pos);
-		ArrayList<Integer> maxPos = maxDim.getPosition();
-		
-		//Second check: Is the maxPos also inside of this container`?
-		for (int i=0; i<maxPos.length; i++) {
-			int maxDim = maxPos.get(i);
-			if ((maxDim < 0)||(maxDim > this.getDimension(i))) return false;
-		}
-				
-		return true;
-	}
-
-		**/
-
-
-
 	/**	@param block the block object to place
 		@param pos the position to place block 
 		@return true if block placed at pos does not cause any overlapping with previously placed blocks
@@ -131,36 +160,26 @@ public class Container extends Block
 	**/
 	public boolean checkPositionOverlap (Block block, Position pos)
 	{
-		ArrayList<Integer> minPos = pos.getPosition();
-		Position maxDim = block.getMaxDimension(pos);
-		ArrayList<Integer> maxPos = maxDim.getPosition();
-
-		ArrayList<Double> l1 = new Line(minPos, maxPos);
-		//doesn't work
-		//check: for every connection c1 between two vertices of block
-			//and for every connection c2 within the container (including pieces already placed)
-				//whether c1 and c2 intersect
-		for (int i=0; i<mGluedBlocks.size(); i++){
-			if (Line.doIntersect(l1, mGluedBlocks.get(i))) return false;
+		
+		ArrayList<Line> blockLines = block.getConnectingLines();
+		ArrayList <Line> containerLines = this.getConnectingLines();
+		
+		for (Line lBlock : blockLines)
+		{
+			for (Line lContainer : containerLines)
+			{
+				if (lBlock.doIntersect(lContainer) && !lBlock.isSameOrientation(lContainer))
+					return false;
+			}
 		}
 		return true;
 	}
-	
-	//unnecessary
-	/**	@param block the block object to place
-		@param pos the position to place block 
-		@return true if block placed at pos remains within the container and does not cause any overlapping with previously placed blocks
-		The position refers to the top-left corner of the smallest possible rectangle containig the block
-	**/
-	public boolean checkPosition (Block block, Position pos)
-	{
-		//if (checkPositionValid(block, pos)) {
-			if (checkPositionOverlap(block, pos)) return true;				
-		//}
-		return false;
-	}
 
+	public int getAmountOfBlocks() {
+		return mGluedBlocks.size();
+	}
+	
 	private HashMap <Glue, Block> mGluedBlocks;
 	
-	private final static int DEFAULT_VALUE;
+	
 }

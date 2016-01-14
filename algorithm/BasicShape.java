@@ -69,6 +69,22 @@ public class BasicShape
 		this (clone.vectors, clone.adjMatrix);
 	}
 	
+	public ArrayList <Line> getConnectingLines()
+	{
+		ArrayList <Line> lines = new ArrayList<Line>();
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+		{
+			ArrayList <IntegerMatrix> connected = lookUpConnections(cVertex);
+			for (int cConnect = 0; cConnect < connected.size(); ++cConnect)
+			{
+				Line l = new Line (new Glue (getVertex(cVertex)), new Glue (connected.get (cConnect)));
+				lines.add(l);
+			}
+				
+		}
+		return lines;
+	}
+	
 	/**
 	 * @param index index of point to look up connections for
 	 * @return array list containing vectors to points connected to point at index
