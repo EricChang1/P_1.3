@@ -1,6 +1,7 @@
 package algorithm;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import algorithm.Matrix.*;
 
@@ -117,6 +118,22 @@ public class Container extends Block
 	public Container (int d, int w, int h)
 	{
 		super(constructInitShape (d, w, h), 0);
+		mDepth = d;
+		mWidth = w;
+		mHeight = h;
+		mGluedBlocks = new HashMap<Glue, Block>();
+	}
+	
+	/**
+	 * @return deep copy of this
+	 */
+	public Container clone()
+	{
+		Container clone = new Container (getDepth(), getWidth(), getHeight());
+		for (Entry <Glue, Block> entry : mGluedBlocks.entrySet())
+			clone.mGluedBlocks.put(entry.getKey().clone(), entry.getValue().clone());
+		
+		return clone;
 	}
 	
 	/**	Places a block at the specified position
@@ -154,6 +171,30 @@ public class Container extends Block
 	}
 	
 	/**
+	 * @return width of the container (x2)
+	 */
+	public int getWidth()
+	{
+		return mWidth;
+	}
+	
+	/**
+	 * @return height of container (x3)
+	 */
+	public int getHeight()
+	{
+		return mHeight;
+	}
+	
+	/**
+	 * @return depth of container (x1)
+	 */
+	public int getDepth()
+	{
+		return mDepth;
+	}
+	
+	/**
 	 * @param pos position to check
 	 * @return true if there is a block associated with pos
 	 */
@@ -183,12 +224,14 @@ public class Container extends Block
 		}
 		return true;
 	}
-
+	
+	/**
+	 * @return number of blocks placed in this container
+	 */
 	public int getAmountOfBlocks() {
 		return mGluedBlocks.size();
 	}
 	
 	private HashMap <Glue, Block> mGluedBlocks;
-	
-	
+	private int mDepth, mWidth, mHeight;
 }
