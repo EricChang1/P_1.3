@@ -35,7 +35,7 @@ public class Glue implements Cloneable
 	}
 	
 	
-	public Glue (IntegerMatrix vec)
+	public Glue (Matrix<Integer> vec)
 	{
 		if (vec.getColumns() != 1)
 			throw new NotAVectorException ("Matrix of size " + vec.getRows() + " x " + vec.getColumns() + " is not a vector!");

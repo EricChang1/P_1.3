@@ -9,6 +9,7 @@ import algorithm.Matrix.*;
 public class Line 
 {
 	
+	@SuppressWarnings("serial")
 	public static class LineDimensionMismatchException extends IllegalArgumentException
 	{
 		public LineDimensionMismatchException () {}
@@ -76,6 +77,21 @@ public class Line
 		mNormedLineVector = normVector (mNormedLineVector);
 	}
 	
+	/**
+	 * @return starting point of line
+	 */
+	public Glue getFirst()
+	{
+		return mP1;
+	}
+	
+	/**
+	 * @return end point of line
+	 */
+	public Glue getSecond()
+	{
+		return mP2;
+	}
 	
 	public boolean doIntersect (Line l2)
 	{
@@ -120,22 +136,23 @@ public class Line
 	}
 	
 	/**
-	 * @param scalar scalar of normed vector in line
-	 * @return true if mP1 + mNormedLineVector * scalar <= mP2
+	 * @param scalar strictly positive scalar of normed vector in line
+	 * @return true if mP1 + mNormedLineVector * scalar < mP2
 	 */
 	public boolean isScalarOnLine (double scalar)
 	{
+		if (scalar <= 0)
+			return false;
 		for (int cDim = 0; cDim < mP1.getDimension(); ++cDim)
 		{
 			double coord = (double)mP1.getPosition().get(cDim) + mNormedLineVector.getCell(cDim, 0) * scalar;
-			if (mP1.getPosition().get(cDim) < mP2.getPosition().get(cDim) && coord > mP2.getPosition().get(cDim))
+			if (mP1.getPosition().get(cDim) < mP2.getPosition().get(cDim) && coord >= mP2.getPosition().get(cDim))
 				return false;
-			if (mP1.getPosition().get(cDim) > mP2.getPosition().get(cDim) && coord < mP2.getPosition().get(cDim))
+			if (mP1.getPosition().get(cDim) > mP2.getPosition().get(cDim) && coord <= mP2.getPosition().get(cDim))
 				return false;
 		}
 		return true;
 	}
-	
 	
 	private Glue mP1, mP2;
 	private DoubleMatrix mNormedLineVector;
