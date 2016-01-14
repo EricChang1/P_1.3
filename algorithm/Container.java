@@ -153,6 +153,15 @@ public class Container extends Block
 		return "container with " + mGluedBlocks.size() + " blocks";
 	}
 	
+	/**
+	 * @param pos position to check
+	 * @return true if there is a block associated with pos
+	 */
+	public boolean hasBlockAt (Position pos)
+	{
+		return mGluedBlocks.containsKey(pos);
+	}
+	
 	/**	@param block the block object to place
 		@param pos the position to place block 
 		@return true if block placed at pos does not cause any overlapping with previously placed blocks
