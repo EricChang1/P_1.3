@@ -2,11 +2,14 @@ package algorithm;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import algorithm.Matrix.*;
 
 public class BasicShape
 {
+	public static enum RelatPos {FRONT, BACK, LEFT, RIGHT, ABOVE, BELOW};
+	
 	@SuppressWarnings("serial")
 	public static class BadNumberOfRowsException extends IllegalArgumentException
 	{
@@ -21,17 +24,6 @@ public class BasicShape
 		public BadNumberOfCollumsException() {super(); }
 		
 		public BadNumberOfCollumsException (String message) { super (message); }
-	}
-	
-	@SuppressWarnings("unchecked")
-	public BasicShape(ArrayList <IntegerMatrix> vectors, IntegerMatrix adjMatrix){
-
-		this.vectors = (ArrayList<IntegerMatrix>) vectors.clone();
-		if (!numberOfCols(vectors)) 
-			throw new BadNumberOfCollumsException ("The vectors introduced are not 3x1");
-		dimensions = new ArrayList<Integer>();
-		calcDim (vectors);
-		this.adjMatrix = adjMatrix.clone();
 	}
 	
 	/** Creates a rotation matrix based on given angles of rotation
@@ -60,6 +52,22 @@ public class BasicShape
 		return rotationMatrix1.multiply (rotationMatrix2, new Matrix.DoubleMatrix (3, 3));
 	}
 	
+	@SuppressWarnings("unchecked")
+	public BasicShape(ArrayList <IntegerMatrix> vectors, IntegerMatrix adjMatrix){
+
+		this.vectors = (ArrayList<IntegerMatrix>) vectors.clone();
+		if (!numberOfCols(vectors)) 
+			throw new BadNumberOfCollumsException ("The vectors introduced are not 3x1");
+		dimensions = new ArrayList<Integer>();
+		calcDim (vectors);
+		mPossibleConnections = new ArrayList<ArrayList<RelatPos>>();
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+			mPossibleConnections.add (new ArrayList <RelatPos> (Arrays.asList(RelatPos.values())));
+		this.adjMatrix = adjMatrix.clone();
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+			resetConnections(cVertex);
+	}
+	
 	/**
 	 * construct basic shape by copying clone
 	 * @param clone another basic shape
@@ -69,6 +77,9 @@ public class BasicShape
 		this (clone.vectors, clone.adjMatrix);
 	}
 	
+	/**
+	 * @return list of line objects, containing a line for each connection
+	 */
 	public ArrayList <Line> getConnectingLines()
 	{
 		ArrayList <Line> lines = new ArrayList<Line>();
@@ -220,21 +231,24 @@ public class BasicShape
 	 */
 	public void addShape (BasicShape bs)
 	{
+		//adjust for new data
 		int prevNumVertices = getNumberOfVertices();
 		addVertices (bs.vectors);
 		IntegerMatrix newAdjMat = new IntegerMatrix (vectors.size(), vectors.size());
 		newAdjMat.copyValues(adjMatrix, 0, 0, 0, 0, adjMatrix.getRows(), adjMatrix.getColumns());
+		//iterate through newly added vertices
 		for (int cVertex = prevNumVertices; cVertex < getNumberOfVertices(); ++cVertex)
 		{
 			int indBSVertex = bs.getVertexIndex(getVertex (cVertex));
 			ArrayList <IntegerMatrix> connected = bs.lookUpConnections (indBSVertex);
-			
+			//copy connections from bs
 			for (IntegerMatrix connection : connected)
 			{
 				int connectionIndex = this.getVertexIndex (connection);
 				newAdjMat.setCell(cVertex, connectionIndex, 1);
 				newAdjMat.setCell(connectionIndex, cVertex, 1);
 			}
+			resetConnections (cVertex);
 		}
 		adjMatrix = newAdjMat;
 	}
@@ -271,7 +285,6 @@ public class BasicShape
 
 	}
 	
-	
 	public void print(PrintStream p)
 	{
 		p.println ("Printing vertices of basic shape");
@@ -302,7 +315,34 @@ public class BasicShape
 		}
 	}
 	
+	/**
+	 * Recalculates list of available connections for vertex at index iVertex
+	 * @param iVertex
+	 */
+	private void resetConnections (int iVertex)
+	{
+		ArrayList <IntegerMatrix> connections = lookUpConnections(iVertex);
+		IntegerMatrix vertex = getVertex(iVertex);
+		for (IntegerMatrix conn : connections)
+		{
+			ArrayList <RelatPos> remain = mPossibleConnections.get(iVertex);
+			if (conn.getCell(0, 0) < vertex.getCell(0, 0))
+				remain.remove(RelatPos.BACK);
+			else if (conn.getCell(0, 0) > vertex.getCell(0, 0))
+				remain.remove(RelatPos.FRONT);
+			if (conn.getCell(1, 0) < vertex.getCell (1, 0))
+				remain.remove(RelatPos.LEFT);
+			else if (conn.getCell(1, 0) > vertex.getCell(1, 0))
+				remain.remove (RelatPos.RIGHT);
+			if (conn.getCell(2, 0) < vertex.getCell(2, 0))
+				remain.remove (RelatPos.BELOW);
+			else if (conn.getCell (2, 0) > vertex.getCell(2, 0))
+				remain.remove(RelatPos.ABOVE);
+		}
+	}
+	
 	private ArrayList<IntegerMatrix> vectors;
 	private ArrayList<Integer> dimensions;
+	private ArrayList <ArrayList <RelatPos>> mPossibleConnections;
 	private IntegerMatrix adjMatrix;
 }
