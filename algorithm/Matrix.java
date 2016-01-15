@@ -118,6 +118,8 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	
 	public static class DoubleMatrix extends Matrix <Double>
 	{
+		public static double epsilon = 0.0001;
+		
 		/** Constructs matrix whose cells are initialized to 0
 			@param rows number of rows
 			@param cols number of columns
@@ -191,6 +193,23 @@ public abstract class Matrix <T extends Number> implements Cloneable
 			for (int cEntry = 0; cEntry < v1.length; ++cEntry)
 				result += v1[cEntry] * v2[cEntry];
 			return result;
+		}
+		
+		
+		public boolean equals (DoubleMatrix comp)
+		{
+			if (comp.getRows() != this.getRows() || comp.getColumns() != this.getColumns())
+				return false;
+			for (int cRow = 0; cRow < this.getRows(); ++cRow)
+			{
+				for (int cCol = 0; cCol < this.getColumns(); ++cCol)
+				{
+					double diff = this.getCell(cRow, cCol) - comp.getCell(cRow, cCol);
+					if (diff < -epsilon || diff > epsilon)
+						return false;
+				}
+			}
+			return true;
 		}
 	}
 	
@@ -442,6 +461,8 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	 */
 	public void setCell (int row, int col, T value) 
 	{
+		if (row < 0 || row > getRows() || col < 0 || col > getColumns())
+			throw new MatrixOutOfBoundsException ("Index " + row + " " + col + "out of bounds in matrix of size " + getRows() + " " + getColumns());
 		mStoreArray[row][col] = value;
 	}
 	

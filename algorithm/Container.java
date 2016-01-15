@@ -1,12 +1,14 @@
 package algorithm;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 import algorithm.Matrix.*;
 
 
 public class Container extends Block
-{
+{	
+	
 	@SuppressWarnings("serial")
 	public static class BlockNotFoundException extends IllegalArgumentException
 	{
@@ -117,6 +119,19 @@ public class Container extends Block
 	public Container (int d, int w, int h)
 	{
 		super(constructInitShape (d, w, h), 0);
+		mGluedBlocks = new HashMap<Glue, Block>();
+	}
+	
+	/**
+	 * @return deep copy of this
+	 */
+	public Container clone()
+	{
+		Container clone = new Container (getDimensions(0), getDimensions(1), getDimensions(2));
+		for (Entry <Glue, Block> entry : mGluedBlocks.entrySet())
+			clone.mGluedBlocks.put(entry.getKey().clone(), entry.getValue().clone());
+		
+		return clone;
 	}
 	
 	/**	Places a block at the specified position
@@ -126,22 +141,23 @@ public class Container extends Block
 		Postcondition: Container will contain block at pos if pos does not refer to another block already placed
 		The position refers to the uppermost top-left corner of the smallest possible cuboid containing the block
 	**/
-	public void placeBlock (Block block, Position pos) throws WrongPositionException
+	public void placeBlock (Block block, Glue pos)
 	{
 		Glue glue = pos.clone();
+		block.glue (pos);
 		mGluedBlocks.put(glue, block);
 		addShape(block);
 		//@TODO keep track of volume of placed blocks
 	}
 	
 	/** @param pos Position queried block is at
-		@return block at pos
+		@return block at pos as clone
 		@throws BlockNotFoundException
 	**/
 	public Block getBlockAt (Position pos) throws BlockNotFoundException
 	{
 		if (mGluedBlocks.containsKey(pos))
-			return mGluedBlocks.get(pos);
+			return mGluedBlocks.get(pos).clone();
 		else 
 			throw new BlockNotFoundException ("There is no block at" + pos);
 	}
@@ -153,6 +169,15 @@ public class Container extends Block
 		return "container with " + mGluedBlocks.size() + " blocks";
 	}
 	
+	/**
+	 * @param pos position to check
+	 * @return true if there is a block associated with pos
+	 */
+	public boolean hasBlockAt (Position pos)
+	{
+		return mGluedBlocks.containsKey(pos);
+	}
+	
 	/**	@param block the block object to place
 		@param pos the position to place block 
 		@return true if block placed at pos does not cause any overlapping with previously placed blocks
@@ -160,7 +185,6 @@ public class Container extends Block
 	**/
 	public boolean checkPositionOverlap (Block block, Position pos)
 	{
-		
 		ArrayList<Line> blockLines = block.getConnectingLines();
 		ArrayList <Line> containerLines = this.getConnectingLines();
 		
@@ -174,12 +198,13 @@ public class Container extends Block
 		}
 		return true;
 	}
-
+	
+	/**
+	 * @return number of blocks placed in this container
+	 */
 	public int getAmountOfBlocks() {
 		return mGluedBlocks.size();
 	}
 	
 	private HashMap <Glue, Block> mGluedBlocks;
-	
-	
 }

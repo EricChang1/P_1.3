@@ -17,7 +17,7 @@ public class Glue implements Cloneable
 			super();
 		}
 		public GlueException(String message) {
-			super(message); 
+			super(message);
 			}
 	}
 	
@@ -29,8 +29,11 @@ public class Glue implements Cloneable
 		public NotAVectorException (String message) {super (message); }
 	}
 	
-	public Glue(ArrayList<Integer> position){
-		ArrayList<Integer> pos = position; 
+	public Glue(ArrayList<Integer> position)
+	{
+		if (position == null)
+			throw new NullPointerException("null argument");
+		pos = (ArrayList<Integer>) position.clone(); 
 		if (pos.size() != 3) throw new GlueException("This ArrayList does not contain the appropriate number of positions");
 	}
 	
@@ -39,9 +42,9 @@ public class Glue implements Cloneable
 	{
 		if (vec.getColumns() != 1)
 			throw new NotAVectorException ("Matrix of size " + vec.getRows() + " x " + vec.getColumns() + " is not a vector!");
-		ArrayList <Integer> coords = new ArrayList<Integer>();
+		pos = new ArrayList<Integer>();
 		for (int cRow = 0; cRow < vec.getRows(); ++cRow)
-			coords.add(vec.getCell (cRow, 0));
+			pos.add(vec.getCell (cRow, 0));
 	}
 	
 	public Glue clone()
