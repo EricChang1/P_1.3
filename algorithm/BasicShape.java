@@ -97,15 +97,45 @@ public class BasicShape
 	}
 	
 	/**
+	 * @param place basic shape to place
+	 * @param iVertex location to place place at
+	 * @return list of positions where place may be placed adjacently to vertex at iVertex
+	 */
+	public ArrayList <Position> getRelativePlacements (BasicShape place, int iVertex)
+	{
+		ArrayList <Position> places = new ArrayList<Position>();
+		for (RelatPos r : mPossibleConnections.get(iVertex))
+		{
+			IntegerMatrix pos = getVertex(iVertex);
+			switch (r)
+			{
+			case BACK:	pos.setCell (0, 0, pos.getCell (0, 0) - place.getDimensions(0));
+			break;
+			case FRONT:	pos.setCell (0, 0, pos.getCell (0, 0) + place.getDimensions(0));
+			break;
+			case LEFT:	pos.setCell (1, 0, pos.getCell (1, 0) - place.getDimensions(1));
+			break;
+			case RIGHT:	pos.setCell (1, 0, pos.getCell (1, 0) + place.getDimensions(1));
+			break;
+			case BELOW:	pos.setCell (2, 0, pos.getCell (2, 0) - place.getDimensions(2));
+			break;
+			case ABOVE:	pos.setCell (2, 0, pos.getCell (2, 0) + place.getDimensions(2));
+			}
+			places.add (new Position(pos));
+		}
+		return places;
+	}
+	
+	/**
 	 * @param index index of point to look up connections for
-	 * @return array list containing vectors to points connected to point at index
+	 * @return array list containing vectors to points connected to point at index each as a clone of original
 	 */
 	public ArrayList <IntegerMatrix> lookUpConnections(int index){
 
 		ArrayList<IntegerMatrix> connections = new ArrayList<IntegerMatrix>();
 		for(int counter=0; counter<adjMatrix.getRows(); counter++){
 			if(adjMatrix.getCell(index,counter)!=0){
-					connections.add (vectors.get(counter));
+					connections.add (vectors.get(counter).clone());
 			}
 		}
 		return connections;
@@ -113,11 +143,11 @@ public class BasicShape
 	
 	/**
 	 * @param index index of vertex
-	 * @return vertex at index
+	 * @return vertex at index as clone of original
 	 */
 	public IntegerMatrix getVertex (int index)
 	{
-		return vectors.get(index);
+		return vectors.get(index).clone();
 	}
 	
 	/**

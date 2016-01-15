@@ -7,7 +7,8 @@ import algorithm.Matrix.*;
 
 
 public class Container extends Block
-{
+{	
+	
 	@SuppressWarnings("serial")
 	public static class BlockNotFoundException extends IllegalArgumentException
 	{
@@ -129,11 +130,27 @@ public class Container extends Block
 	 */
 	public Container clone()
 	{
-		Container clone = new Container (getDepth(), getWidth(), getHeight());
+		Container clone = new Container (getDimensions(0), getDimensions(1), getDimensions(2));
 		for (Entry <Glue, Block> entry : mGluedBlocks.entrySet())
 			clone.mGluedBlocks.put(entry.getKey().clone(), entry.getValue().clone());
 		
 		return clone;
+	}
+	
+	
+	public ArrayList <Position> getRelativePlacements (int iVertex, Block block)
+	{
+		
+		ArrayList <Position> relats = new ArrayList <Position>();
+		RelatPos[] places = RelatPos.values();
+		ArrayList <IntegerMatrix> connections = lookUpConnections(iVertex);
+		IntegerMatrix vertex = getVertex (iVertex);
+		for (IntegerMatrix conn : connections)
+		{
+			if (vertex.getCell(0, 0) > conn.getCell(0, 0))
+		}
+		
+		return relats;
 	}
 	
 	/**	Places a block at the specified position
@@ -152,13 +169,13 @@ public class Container extends Block
 	}
 	
 	/** @param pos Position queried block is at
-		@return block at pos
+		@return block at pos as clone
 		@throws BlockNotFoundException
 	**/
 	public Block getBlockAt (Position pos) throws BlockNotFoundException
 	{
 		if (mGluedBlocks.containsKey(pos))
-			return mGluedBlocks.get(pos);
+			return mGluedBlocks.get(pos).clone();
 		else 
 			throw new BlockNotFoundException ("There is no block at" + pos);
 	}
@@ -170,29 +187,7 @@ public class Container extends Block
 		return "container with " + mGluedBlocks.size() + " blocks";
 	}
 	
-	/**
-	 * @return width of the container (x2)
-	 */
-	public int getWidth()
-	{
-		return mWidth;
-	}
 	
-	/**
-	 * @return height of container (x3)
-	 */
-	public int getHeight()
-	{
-		return mHeight;
-	}
-	
-	/**
-	 * @return depth of container (x1)
-	 */
-	public int getDepth()
-	{
-		return mDepth;
-	}
 	
 	/**
 	 * @param pos position to check
@@ -210,7 +205,6 @@ public class Container extends Block
 	**/
 	public boolean checkPositionOverlap (Block block, Position pos)
 	{
-		
 		ArrayList<Line> blockLines = block.getConnectingLines();
 		ArrayList <Line> containerLines = this.getConnectingLines();
 		
