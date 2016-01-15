@@ -64,6 +64,10 @@ public class BasicShape
 		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
 			mPossibleConnections.add (new ArrayList <RelatPos> (Arrays.asList(RelatPos.values())));
 		this.adjMatrix = adjMatrix.clone();
+		ArrayList<Integer> zeroPos = new ArrayList <Integer>();
+		for (int cCoord = 0; cCoord < vectors.get(0).getRows(); ++cCoord)
+			zeroPos.add(new Integer(0));
+		mGlue = new Glue (zeroPos);
 		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
 			resetConnections(cVertex);
 	}
@@ -147,7 +151,10 @@ public class BasicShape
 	 */
 	public IntegerMatrix getVertex (int index)
 	{
-		return vectors.get(index).clone();
+		IntegerMatrix vertex = vectors.get(index).clone();
+		for (int cCoord = 0; cCoord < mGlue.getDimension(); ++cCoord)
+			vertex.setCell(cCoord, 0, vertex.getCell(cCoord, 0) + mGlue.getPosition().get(cCoord));
+		return vertex;
 	}
 	
 	/**
@@ -162,6 +169,14 @@ public class BasicShape
 		maxPos.add(getDimensions(2) + minPos.getPosition().get(2));
 		Position max = new Position(maxPos);
 		return max;
+	}
+	
+	/**
+	 * @return position where shape is glued at
+	 */
+	public Glue getGlue()
+	{
+		return mGlue;
 	}
 	
 	/** calculates the maximum vector value
@@ -284,7 +299,15 @@ public class BasicShape
 			rotMatrix.multiply (vec, result);
 			vectors.set (cCounter, result.toIntegerMatrix());
 		}
-
+	}
+	
+	/**
+	 * Glues shape to g
+	 * @param g position
+	 */
+	public void glue (Glue g)
+	{
+		mGlue = g.clone();
 	}
 	
 	public void print(PrintStream p)
@@ -376,4 +399,5 @@ public class BasicShape
 	private ArrayList<Integer> dimensions;
 	private ArrayList <ArrayList <RelatPos>> mPossibleConnections;
 	private IntegerMatrix adjMatrix;
+	private Glue mGlue;
 }

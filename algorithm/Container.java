@@ -119,9 +119,6 @@ public class Container extends Block
 	public Container (int d, int w, int h)
 	{
 		super(constructInitShape (d, w, h), 0);
-		mDepth = d;
-		mWidth = w;
-		mHeight = h;
 		mGluedBlocks = new HashMap<Glue, Block>();
 	}
 	
@@ -144,9 +141,10 @@ public class Container extends Block
 		Postcondition: Container will contain block at pos if pos does not refer to another block already placed
 		The position refers to the uppermost top-left corner of the smallest possible cuboid containing the block
 	**/
-	public void placeBlock (Block block, Position pos) throws WrongPositionException
+	public void placeBlock (Block block, Glue pos)
 	{
 		Glue glue = pos.clone();
+		block.glue (pos);
 		mGluedBlocks.put(glue, block);
 		addShape(block);
 		//@TODO keep track of volume of placed blocks
@@ -209,5 +207,4 @@ public class Container extends Block
 	}
 	
 	private HashMap <Glue, Block> mGluedBlocks;
-	private int mDepth, mWidth, mHeight;
 }

@@ -4,8 +4,19 @@ import java.util.ArrayList;
 import java.util.Random;
 import algorithm.Matrix.*;
 
+/**
+ * @author martin
+ *	algorithm which chooses one piece and one vertex in container randomly
+ *	chosen piece gets placed at random location
+ *	pieces are placed until no vertex is available anymore
+ */
 public class RandomAlgo implements Runnable
 {
+	/**
+	 * constructs algo from container and pieces
+	 * @param container container to place pieces in
+	 * @param pieces pieces available
+	 */
 	public RandomAlgo (Container container, <Resourceclass> pieces)
 	{
 		mContainer = container.clone();
@@ -14,6 +25,9 @@ public class RandomAlgo implements Runnable
 	}
 	
 	@Override
+	/**
+	 * runs the algorithm
+	 */
 	public void run() 
 	{
 		while (!mPlacingDone)
@@ -24,6 +38,9 @@ public class RandomAlgo implements Runnable
 		
 	}
 	
+	/**
+	 * @return shuffled list of indices to vertices in container
+	 */
 	private ArrayList <Integer> getShuffledVertexList()
 	{
 		ArrayList <Integer> verts = new ArrayList <Integer>(); 
@@ -45,6 +62,10 @@ public class RandomAlgo implements Runnable
 		return verts;
 	}
 	
+	/**
+	 * tries to place a piece at vertices in vertexList until possible
+	 * @param vertexList list of vertices giving order in which vertices are tried
+	 */
 	private void doRandomPlacements (ArrayList <Integer> vertexList)
 	{
 		Random gen = new Random();
