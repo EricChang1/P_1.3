@@ -9,6 +9,7 @@ public class Glue implements Cloneable
 
 	/** Nested class to create a custom exception
 	 */
+	@SuppressWarnings("serial")
 	static class GlueException extends IllegalArgumentException{
 		
 		/**Exception constructor
