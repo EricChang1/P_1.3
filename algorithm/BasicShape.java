@@ -255,34 +255,6 @@ public class BasicShape
 		return vectors.size();
 	}
 	
-	/**
-	 * Expands this shape by adding vectors of bs and connecting bs' vertices with existing ones
-	 * @param bs shape to add to this shape
-	 */
-	public void addShape (BasicShape bs)
-	{
-		//adjust for new data
-		int prevNumVertices = getNumberOfVertices();
-		addVertices (bs.vectors);
-		IntegerMatrix newAdjMat = new IntegerMatrix (vectors.size(), vectors.size());
-		newAdjMat.copyValues(adjMatrix, 0, 0, 0, 0, adjMatrix.getRows(), adjMatrix.getColumns());
-		//iterate through newly added vertices
-		for (int cVertex = prevNumVertices; cVertex < getNumberOfVertices(); ++cVertex)
-		{
-			int indBSVertex = bs.getVertexIndex(getVertex (cVertex));
-			ArrayList <IntegerMatrix> connected = bs.lookUpConnections (indBSVertex);
-			//copy connections from bs
-			for (IntegerMatrix connection : connected)
-			{
-				int connectionIndex = this.getVertexIndex (connection);
-				newAdjMat.setCell(cVertex, connectionIndex, 1);
-				newAdjMat.setCell(connectionIndex, cVertex, 1);
-			}
-			resetConnections (cVertex);
-		}
-		adjMatrix = newAdjMat;
-	}
-	
 	/** Calculates the dimensions of a shape
 	** @param vectors ArrayList containing all the vectors
 	*/
@@ -329,6 +301,35 @@ public class BasicShape
 					p.print (cConnect + ", ");
 			}
 		}
+	}
+	
+	/**
+	 * Expands this shape by adding vectors of bs and connecting bs' vertices with existing ones
+	 * @param bs shape to add to this shape
+	 */
+	protected void addShape (Block b)
+	{
+		BasicShape bs = (BasicShape)b;
+		//adjust for new data
+		int prevNumVertices = getNumberOfVertices();
+		addVertices (bs.vectors);
+		IntegerMatrix newAdjMat = new IntegerMatrix (vectors.size(), vectors.size());
+		newAdjMat.copyValues(adjMatrix, 0, 0, 0, 0, adjMatrix.getRows(), adjMatrix.getColumns());
+		//iterate through newly added vertices
+		for (int cVertex = prevNumVertices; cVertex < getNumberOfVertices(); ++cVertex)
+		{
+			int indBSVertex = bs.getVertexIndex(getVertex (cVertex));
+			ArrayList <IntegerMatrix> connected = bs.lookUpConnections (indBSVertex);
+			//copy connections from bs
+			for (IntegerMatrix connection : connected)
+			{
+				int connectionIndex = this.getVertexIndex (connection);
+				newAdjMat.setCell(cVertex, connectionIndex, 1);
+				newAdjMat.setCell(connectionIndex, cVertex, 1);
+			}
+			resetConnections (cVertex);
+		}
+		adjMatrix = newAdjMat;
 	}
 	
 	/**

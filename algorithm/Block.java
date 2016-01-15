@@ -42,7 +42,7 @@ public class Block extends BasicShape implements Cloneable {
 		return value;
 	}
 	
-	public void addShape (Block b)
+	protected void addShape (Block b)
 	{
 		this.value += b.getValue();
 		super.addShape(b);

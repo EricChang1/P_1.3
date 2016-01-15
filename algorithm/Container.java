@@ -137,22 +137,6 @@ public class Container extends Block
 		return clone;
 	}
 	
-	
-	public ArrayList <Position> getRelativePlacements (int iVertex, Block block)
-	{
-		
-		ArrayList <Position> relats = new ArrayList <Position>();
-		RelatPos[] places = RelatPos.values();
-		ArrayList <IntegerMatrix> connections = lookUpConnections(iVertex);
-		IntegerMatrix vertex = getVertex (iVertex);
-		for (IntegerMatrix conn : connections)
-		{
-			if (vertex.getCell(0, 0) > conn.getCell(0, 0))
-		}
-		
-		return relats;
-	}
-	
 	/**	Places a block at the specified position
 		@param block the block object to place
 		@param pos the position to place block 
@@ -186,8 +170,6 @@ public class Container extends Block
 		//return "Height: " + getDimensions(0) + ",\n width: " + getDimensions(1) + "\nglues at: " + this.mGluedBlocks;
 		return "container with " + mGluedBlocks.size() + " blocks";
 	}
-	
-	
 	
 	/**
 	 * @param pos position to check
