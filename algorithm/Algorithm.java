@@ -2,6 +2,15 @@ package algorithm;
 
 import java.util.ArrayList;
 
+/**
+ * base class for all algorithms
+ * the class can be in 3 states: 1) not started, 2) started but not terminated, 3) terminated
+ * on construction and after initialization, the object will be in state 1)
+ * after call to run() the object will be in state 2)
+ * after call to setAlgoDone() the object will be in state 3)
+ * the only way to go back to state 1) from state 2) and 3) is to call init()
+ * @author martin
+ */
 public abstract class Algorithm implements Runnable
 {
 	@SuppressWarnings("serial")
@@ -13,6 +22,14 @@ public abstract class Algorithm implements Runnable
 	}
 	
 	@SuppressWarnings("serial")
+	public static class AlgorithmRunningException extends IllegalStateException
+	{
+		public AlgorithmRunningException() {}
+		
+		public AlgorithmRunningException (String message) {super (message); }
+	}
+	
+	@SuppressWarnings("serial")
 	public static class AlgorithmTerminatedException extends IllegalStateException
 	{
 		public AlgorithmTerminatedException() {}
@@ -21,15 +38,12 @@ public abstract class Algorithm implements Runnable
 	}
 	
 	/**
-	 * parametric constructor
-	 * @param container starting container
-	 * @param pieces list of available pieces
-	 * Postcondition: the object will store the references directly without cloning
+	 * default constructor
 	 */
-	public Algorithm (Container container, ArrayList <Resource> pieces)
+	public Algorithm ()
 	{
-		mContainer = container;
-		mPieces = pieces;
+		mContainer = null;
+		mPieces = null;
 		mAlgoStarted = false;
 		mAlgoDone = false;
 	}
@@ -61,10 +75,28 @@ public abstract class Algorithm implements Runnable
 	}
 	
 	/**
+	 * Initializes resources 
+	 * Postcondition: starting/termination flags will be reset
+	 * @param container container to perform algorithm for
+	 * @param pieces pieces available
+	 */
+	public final void init (Container container, ArrayList <Resource> pieces)
+	{
+		mContainer = container;
+		mPieces = pieces;
+		mAlgoStarted = false;
+		mAlgoDone = false;
+	}
+	
+	/**
 	 * run algorithm
 	 */
 	public void run()
 	{
+		if (mAlgoStarted)
+			throw new AlgorithmRunningException ("tried to run algorithm object already running");
+		if (mAlgoDone)
+			throw new AlgorithmTerminatedException ("tried to run already terminated algorithm");
 		mAlgoStarted = true;
 	}
 	

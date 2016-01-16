@@ -16,9 +16,8 @@ public class HillClimber extends Algorithm
 	 * @param container starting container
 	 * @param pieces pieces available
 	 */
-	public HillClimber (Container container, ArrayList <Resource> pieces, SelectionHeuristic select, EvaluationHeuristic eval)
+	public HillClimber (SelectionHeuristic select, EvaluationHeuristic eval)
 	{
-		super (container, pieces);
 		mSelect = select;
 		mEval = eval;
 	}

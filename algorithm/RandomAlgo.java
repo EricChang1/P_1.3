@@ -12,16 +12,6 @@ import java.util.Random;
 public class RandomAlgo extends Algorithm
 {
 	/**
-	 * constructs algo from container and pieces
-	 * @param container container to place pieces in
-	 * @param pieces pieces available
-	 */
-	public RandomAlgo (Container container, ArrayList<Resource> pieces)
-	{
-		super (container, pieces);
-	}
-	
-	/**
 	 * @return shuffled list of indices to vertices in container
 	 */
 	public ArrayList <Integer> getShuffledIndices (int maxIndex)
