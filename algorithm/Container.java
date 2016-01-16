@@ -200,6 +200,21 @@ public class Container extends Block
 	}
 	
 	/**
+	 * @param pos position to check
+	 * @return true if position is within the container
+	 */
+	public boolean checkPositionInside (Position pos)
+	{
+		for (int cCoord = 0; cCoord < pos.getDimension(); ++cCoord)
+		{
+			int coord = pos.getPosition(cCoord);
+			if (coord < 0 && coord > getDimensions(cCoord))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * @return number of blocks placed in this container
 	 */
 	public int getAmountOfBlocks() {

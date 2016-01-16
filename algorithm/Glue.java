@@ -60,6 +60,15 @@ public class Glue implements Cloneable
 			return (ArrayList<Integer>) pos.clone();
 	}
 	
+	/**
+	 * @param index index of coordinate
+	 * @return coordinate at index
+	 */
+	public int getPosition (int index)
+	{
+		return pos.get(index);
+	}
+	
 	
 	public IntegerMatrix toVector()
 	{
