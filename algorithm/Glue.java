@@ -57,7 +57,16 @@ public class Glue implements Cloneable
 	* @return Position of glue
 	*/
 	public ArrayList<Integer> getPosition(){
-			return pos;
+			return (ArrayList<Integer>) pos.clone();
+	}
+	
+	
+	public IntegerMatrix toVector()
+	{
+		IntegerMatrix vec = new IntegerMatrix (getDimension(), 1);
+		for (int cCoord = 0; cCoord < getDimension(); ++cCoord)
+			vec.setCell (cCoord, 0, getPosition().get(cCoord));
+		return vec;
 	}
 	
 	/**
@@ -70,5 +79,4 @@ public class Glue implements Cloneable
 	
 		
 	private ArrayList<Integer> pos;
-
 }
