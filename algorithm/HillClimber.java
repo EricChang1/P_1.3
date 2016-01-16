@@ -32,11 +32,13 @@ public class HillClimber extends Algorithm
 		mStartingPosition = start;
 	}
 	
-	
+	/**
+	 * runs the algorithm
+	 */
 	public void run()
 	{
 		super.run();
-		if (getContainer().checkPositionInside (mStartingPosition))
+		if (getContainer().checkPositionInside 1(mStartingPosition))
 			throw new IllegalStateException ("starting position is not within container");
 		
 		boolean init = true;
@@ -64,6 +66,12 @@ public class HillClimber extends Algorithm
 		}
 	}
 	
+	/**
+	 * searches adjacent places for higher score
+	 * @param initial where place is first placed
+	 * @param place piece to place
+	 * @return locally optimal position
+	 */
 	private Glue explore (Glue initial, Block place)
 	{
 		Glue optimal = initial;
@@ -94,6 +102,9 @@ public class HillClimber extends Algorithm
 		return optimal;
 	}
 	
+	/**
+	 * @return the evaluation heuristic's preferred piece
+	 */
 	private Block selectPiece()
 	{
 		ArrayList <Block> available = new ArrayList <Block>();
@@ -111,6 +122,10 @@ public class HillClimber extends Algorithm
 		return null;
 	}
 	
+	/**
+	 * @param place piece to place
+	 * @return position where place is heuristically placed
+	 */
 	private Position placeHeuristic (Block place)
 	{
 		Position maxPos = null;
@@ -130,7 +145,14 @@ public class HillClimber extends Algorithm
 		}
 		return maxPos;
 	}
-		
+	
+	/**
+	 * @param pos position where to place block
+	 * @param block piece to place
+	 * @param clone clone of container to place block in
+	 * @param bestScore best score seen
+	 * @return true if block can be placed and yields a score higher than bestScore
+	 */
 	private boolean placeAndCompare (Position pos, Block block, Container clone, double bestScore)
 	{
 		if (clone.checkPositionInside(pos) && clone.checkPositionOverlap(block, pos))
