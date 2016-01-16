@@ -14,6 +14,14 @@ import java.util.ArrayList;
 public abstract class Algorithm implements Runnable
 {
 	@SuppressWarnings("serial")
+	public static class AlgorithmNotInitializedException extends IllegalStateException
+	{
+		public AlgorithmNotInitializedException() {}
+		
+		public AlgorithmNotInitializedException (String message) {super (message); }
+	}
+	
+	@SuppressWarnings("serial")
 	public static class AlgorithmNotStartedException extends IllegalStateException
 	{
 		public AlgorithmNotStartedException() {}
@@ -80,7 +88,7 @@ public abstract class Algorithm implements Runnable
 	 * @param container container to perform algorithm for
 	 * @param pieces pieces available
 	 */
-	public final void init (Container container, ArrayList <Resource> pieces)
+	public void init (Container container, ArrayList <Resource> pieces)
 	{
 		mContainer = container;
 		mPieces = pieces;
@@ -93,6 +101,8 @@ public abstract class Algorithm implements Runnable
 	 */
 	public void run()
 	{
+		if (mContainer == null || mPieces == null)
+			throw new AlgorithmNotInitializedException ("Missing init parameters to run the algorithm");
 		if (mAlgoStarted)
 			throw new AlgorithmRunningException ("tried to run algorithm object already running");
 		if (mAlgoDone)
