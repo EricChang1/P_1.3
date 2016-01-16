@@ -183,7 +183,7 @@ public class Container extends Block
 		@return true if block placed at pos does not cause any overlapping with previously placed blocks
 		The position refers to the top-left corner of the smallest possible rectangle containig the block
 	**/
-	public boolean checkPositionOverlap (Block block, Position pos)
+	public boolean checkPositionOverlap (Block block, Glue pos)
 	{
 		ArrayList<Line> blockLines = block.getConnectingLines();
 		ArrayList <Line> containerLines = this.getConnectingLines();
@@ -200,14 +200,14 @@ public class Container extends Block
 	}
 	
 	/**
-	 * @param pos position to check
+	 * @param mStartingPosition position to check
 	 * @return true if position is within the container
 	 */
-	public boolean checkPositionInside (Position pos)
+	public boolean checkPositionInside (Glue mStartingPosition)
 	{
-		for (int cCoord = 0; cCoord < pos.getDimension(); ++cCoord)
+		for (int cCoord = 0; cCoord < mStartingPosition.getDimension(); ++cCoord)
 		{
-			int coord = pos.getPosition(cCoord);
+			int coord = mStartingPosition.getPosition(cCoord);
 			if (coord < 0 && coord > getDimensions(cCoord))
 				return false;
 		}

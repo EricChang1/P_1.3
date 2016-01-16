@@ -51,7 +51,7 @@ public class Resource implements Cloneable
 	
 	public Block getBlock()
 	{
-		return block;
+		return block.clone();
 	}
 	
 	public double getVolume()
