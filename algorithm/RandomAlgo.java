@@ -9,7 +9,7 @@ import java.util.Random;
  *	chosen piece gets placed at random location
  *	pieces are placed until no vertex is available anymore
  */
-public class RandomAlgo implements Runnable
+public class RandomAlgo extends Algorithm
 {
 	/**
 	 * constructs algo from container and pieces
@@ -18,9 +18,7 @@ public class RandomAlgo implements Runnable
 	 */
 	public RandomAlgo (Container container, ArrayList<Resource> pieces)
 	{
-		mContainer = container.clone();
-		mPieces = (ArrayList<Resource>) pieces.clone();
-		mPlacingDone = false;
+		super (container, pieces);
 	}
 	
 	/**
@@ -53,10 +51,11 @@ public class RandomAlgo implements Runnable
 	 */
 	public void run() 
 	{
-		while (!mPlacingDone)
+		super.run();
+		while (!isAlgoDone())
 		{
-			ArrayList <Integer> shuffledVertices = getShuffledIndices(mContainer.getNumberOfVertices());
-			ArrayList<Integer> shuffledPieces = getShuffledIndices(mPieces.size());
+			ArrayList <Integer> shuffledVertices = getShuffledIndices(getContainer().getNumberOfVertices());
+			ArrayList<Integer> shuffledPieces = getShuffledIndices(getPieces().size());
 			doRandomPlacements(shuffledVertices, shuffledPieces);
 		}
 		
@@ -75,16 +74,16 @@ public class RandomAlgo implements Runnable
 			int iBlock = 0;
 			while (!placed && iBlock < blockList.size())
 			{
-				Resource res = mPieces.get(blockList.get(iBlock));
+				Resource res = getPieces().get(blockList.get(iBlock));
 				if (!res.isEmpty())
 				{
 					//be careful about copying here
-					ArrayList<Position> relats = mContainer.getRelativePlacements(res.getBlock(), vertexList.get(iVertex));
+					ArrayList<Position> relats = getContainer().getRelativePlacements(res.getBlock(), vertexList.get(iVertex));
 					for (Position relat : relats)
 					{
-						if (mContainer.checkPositionOverlap(res.getBlock(), relat))
+						if (getContainer().checkPositionOverlap(res.getBlock(), relat))
 						{
-							mContainer.placeBlock(res.getBlock(), relat);
+							getContainer().placeBlock(res.getBlock(), relat);
 							placed = true;
 						}
 					}
@@ -95,10 +94,6 @@ public class RandomAlgo implements Runnable
 		}
 		
 		if (!placed)
-			mPlacingDone = true;
+			setAlgoDone();
 	}
-	
-	private Container mContainer;
-	private ArrayList <Resource> mPieces;
-	private boolean mPlacingDone;
 }
