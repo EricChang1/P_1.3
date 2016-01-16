@@ -1,14 +1,22 @@
 package algorithm;
 
-public class Resource 
+public class Resource implements Cloneable
 {
 	
 	public Resource(Block Block, int Inventory, double Volume, boolean Infinite)
 	{
-		block = Block;
+		block = Block.clone();
 		inventory = Inventory;
 		volume = Volume;
 		infinite = Infinite;
+	}
+	
+	/**
+	 * deep copy clone method
+	 */
+	public Resource clone()
+	{
+		return new Resource (block, inventory, volume, infinite);
 	}
 	
 	public void refill()
