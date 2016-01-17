@@ -89,8 +89,9 @@ public class IntersectionSolver
 		solver.run();
 		if (solver.isConsistent() && solver.allBasicVariables())
 		{
-			mScalar1 = solver.getMatrix().getCell(0, solver.getMatrix().getColumns());
-			mScalar2 = solver.getMatrix().getCell(1, solver.getMatrix().getColumns());
+			mSolutionType = Result.ONE;
+			mScalar1 = solver.getMatrix().getCell(0, solver.getMatrix().getColumns() - 1);
+			mScalar2 = solver.getMatrix().getCell(1, solver.getMatrix().getColumns() - 1);
 			Position inter = getIntersection();
 			mOnline = true;
 			int cDim = 0;

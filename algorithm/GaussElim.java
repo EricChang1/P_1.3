@@ -81,7 +81,7 @@ public class GaussElim implements Runnable
 	
 	/**
 	 * constructor
-	 * @param m matrix to perform algo for
+	 * @param m augmented matrix to perform algo for
 	 */
 	public GaussElim (DoubleMatrix m)
 	{
@@ -141,7 +141,7 @@ public class GaussElim implements Runnable
 	 */
 	public boolean allBasicVariables ()
 	{
-		return (mPivots[mPivots.length - 1] < mMat.getColumns());
+		return (mPivots[mMat.getColumns() - 2] < mMat.getColumns());
 	}
 	
 	/**
@@ -150,13 +150,9 @@ public class GaussElim implements Runnable
 	public boolean isConsistent()
 	{
 		int cRow = mMat.getRows() - 1;
-		while (mPivots[cRow] == mMat.getColumns() && cRow >= 0)
-		{
-			if (!mMat.getCell(cRow, mMat.getColumns() - 1).equals(0))
-				return false;
+		while (mPivots[cRow] == mMat.getColumns() && cRow > 0)
 			--cRow;
-		}
-		return true;
+		return (mPivots[cRow] != mMat.getColumns() - 1);
 	}
 	
 	/**
@@ -186,7 +182,6 @@ public class GaussElim implements Runnable
 			rows[cRow] = mMat.getRow(cRow).clone();
 		
 		quickSort (rows, mPivots, 0, rows.length - 1);
-		System.out.println ("after sorting");
 		for (int cRow = 0; cRow < rows.length; ++cRow)
 		{
 			for (int cCol = 0; cCol < rows[cRow].length; ++cCol)
