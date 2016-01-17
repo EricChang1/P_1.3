@@ -2,6 +2,11 @@ package algorithm;
 
 import algorithm.Matrix.*;
 
+/**
+ * solves systems of linear equations
+ * @author martin
+ *
+ */
 public class GaussElim implements Runnable
 {
 	public static boolean mDebug = false;
@@ -21,13 +26,14 @@ public class GaussElim implements Runnable
 		GaussElim g = new GaussElim(m);
 		g.run();
 		g.mMat.print(System.out);
-		System.out.println ("all basic " + g.allBasicVariables(0, 1));
+		System.out.println ("all basic " + g.allBasicVariables());
+		System.out.println ("consistent " + g.isConsistent());
 	}
 	
 	/**
 	 * swaps elements in r, p given by i1, i2
 	 * @param r array representation of matrix
-	 * @param p array of pivots
+	 * @param p array of mPivots
 	 * @param i1 row 1
 	 * @param i2 row 2
 	 */
@@ -80,6 +86,7 @@ public class GaussElim implements Runnable
 	public GaussElim (DoubleMatrix m)
 	{
 		mMat = m.clone();
+		mPivots = findmPivots();
 	}
 	
 	/**
@@ -92,26 +99,26 @@ public class GaussElim implements Runnable
 			System.out.println ("Initial");
 			mMat.print(System.out);
 		}
-		int[] pivots = findPivots();
-		order (pivots);
+		int[] mPivots = findmPivots();
+		order();
 		if (mDebug)
 		{
 			System.out.println ("ordered");
 			mMat.print(System.out);
 		}
-		forward (pivots);
+		forward();
 		if (mDebug)
 		{
 			System.out.println ("forward");
 			mMat.print(System.out);
 		}
-		backward (pivots);
+		backward();
 		if (mDebug)
 		{
 			System.out.println ("backward");
 			mMat.print(System.out);
 		}
-		scaleToOne (pivots);
+		scaleToOne();
 		if (mDebug)
 		{
 			System.out.println ("scaled");
@@ -132,18 +139,22 @@ public class GaussElim implements Runnable
 	 * @param endCol
 	 * @return true if all variables within startCol and endCol are basic variables
 	 */
-	public boolean allBasicVariables (int startCol, int endCol)
+	public boolean allBasicVariables ()
 	{
-		for (int cRow = 0; cRow < 0; ++cRow)
+		return (mPivots[mPivots.length - 1] < mMat.getColumns());
+	}
+	
+	/**
+	 * @return true if system is consistent
+	 */
+	public boolean isConsistent()
+	{
+		int cRow = mMat.getRows() - 1;
+		while (mPivots[cRow] == mMat.getColumns() && cRow >= 0)
 		{
-			boolean beyondPivot = false;
-			for (int cCol = Math.max (startCol, cRow); cCol <= endCol; ++cCol)
-			{
-				if (!beyondPivot && !mMat.getCell(cRow, cCol).equals(0.0))
-					beyondPivot = false;
-				else if (beyondPivot)
-					return false;
-			}
+			if (!mMat.getCell(cRow, mMat.getColumns() - 1).equals(0))
+				return false;
+			--cRow;
 		}
 		return true;
 	}
@@ -151,7 +162,7 @@ public class GaussElim implements Runnable
 	/**
 	 * @return array of pivot indices
 	 */
-	public int[] findPivots()
+	public int[] findmPivots()
 	{
 		int[] pivotIndex = new int[mMat.getRows()];
 		for (int cRow = 0; cRow < mMat.getRows(); ++cRow)
@@ -166,15 +177,15 @@ public class GaussElim implements Runnable
 	
 	/**
 	 * orders the rows of the matrix such that rows with low pivot indices are placed first
-	 * @param pivots array of pivot indices
+	 * @param mPivots array of pivot indices
 	 */
-	public void order (int[] pivots)
+	public void order()
 	{
 		Double[][] rows = new Double[mMat.getRows()][mMat.getColumns()];
 		for (int cRow = 0; cRow < rows.length; ++cRow)
 			rows[cRow] = mMat.getRow(cRow).clone();
 		
-		quickSort (rows, pivots, 0, rows.length - 1);
+		quickSort (rows, mPivots, 0, rows.length - 1);
 		System.out.println ("after sorting");
 		for (int cRow = 0; cRow < rows.length; ++cRow)
 		{
@@ -185,24 +196,24 @@ public class GaussElim implements Runnable
 	
 	/**
 	 * performs forward step
-	 * @param pivots array of pivot indices
+	 * @param mPivots array of pivot indices
 	 */
-	public void forward (int[] pivots)
+	public void forward()
 	{
 		int cRow = 0;
-		while (cRow < mMat.getRows() - 1 && pivots[cRow] < mMat.getColumns())
+		while (cRow < mMat.getRows() - 1 && mPivots[cRow] < mMat.getColumns())
 		{
-			double pivot = mMat.getCell(cRow, pivots[cRow]);
+			double pivot = mMat.getCell(cRow, mPivots[cRow]);
 			for (int cRestRow = cRow + 1; cRestRow < mMat.getRows(); ++cRestRow)
 			{
-				double c = -mMat.getCell(cRestRow, pivots[cRow]) / pivot;
+				double c = -mMat.getCell(cRestRow, mPivots[cRow]) / pivot;
 				boolean beyondPivot = false;
-				for (int cRestCol = pivots[cRow]; cRestCol < mMat.getColumns(); ++cRestCol)
+				for (int cRestCol = mPivots[cRow]; cRestCol < mMat.getColumns(); ++cRestCol)
 				{
 					boolean nonZero = (!mMat.getCell (cRestRow, cRestCol).equals (0.0));
 					mMat.setCell (cRestRow, cRestCol, mMat.getCell(cRestRow, cRestCol) + c * mMat.getCell(cRow, cRestCol));
 					if (!beyondPivot && nonZero && mMat.getCell (cRestRow, cRestCol).equals (0.0))
-						++pivots[cRestRow];
+						++mPivots[cRestRow];
 					beyondPivot = false;
 				}
 			}
@@ -212,19 +223,19 @@ public class GaussElim implements Runnable
 	
 	/**
 	 * performs backward step
-	 * @param pivots array of pivot indices
+	 * @param mPivots array of pivot indices
 	 */
-	public void backward (int[] pivots)
+	public void backward()
 	{
 		for (int cRow = mMat.getRows() - 1; cRow > 0; --cRow)
 		{
-			if (pivots[cRow] != mMat.getColumns())
+			if (mPivots[cRow] != mMat.getColumns())
 			{
-				double pivot = mMat.getCell (cRow, pivots[cRow]);
+				double pivot = mMat.getCell (cRow, mPivots[cRow]);
 				for (int cRestRow = cRow - 1; cRestRow >= 0; --cRestRow)
 				{
-					double c = -mMat.getCell(cRestRow, pivots[cRow]) / pivot;
-					for (int cRestCol = pivots[cRow]; cRestCol < mMat.getColumns(); ++cRestCol)
+					double c = -mMat.getCell(cRestRow, mPivots[cRow]) / pivot;
+					for (int cRestCol = mPivots[cRow]; cRestCol < mMat.getColumns(); ++cRestCol)
 						mMat.setCell(cRestRow, cRestCol, mMat.getCell(cRestRow, cRestCol) + c * mMat.getCell(cRow, cRestCol));
 				}
 			}
@@ -232,20 +243,21 @@ public class GaussElim implements Runnable
 	}
 	
 	/**
-	 * scales pivots to 1
-	 * @param pivots array of pivot indices
+	 * scales mPivots to 1
+	 * @param mPivots array of pivot indices
 	 */
-	public void scaleToOne (int[] pivots)
+	public void scaleToOne()
 	{
 		int cRow = 0;
-		while (cRow < mMat.getRows() && pivots[cRow] != mMat.getColumns())
+		while (cRow < mMat.getRows() && mPivots[cRow] != mMat.getColumns())
 		{
-			double c = 1 / mMat.getCell(cRow, pivots[cRow]);
-			for (int cCol = pivots[cRow]; cCol < mMat.getColumns(); ++cCol)
+			double c = 1 / mMat.getCell(cRow, mPivots[cRow]);
+			for (int cCol = mPivots[cRow]; cCol < mMat.getColumns(); ++cCol)
 				mMat.setCell(cRow, cCol, mMat.getCell(cRow, cCol) * c);
 			++cRow;
 		}
 	}
 	
 	private DoubleMatrix mMat;
+	private int[] mPivots;
 }
