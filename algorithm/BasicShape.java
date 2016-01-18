@@ -79,6 +79,7 @@ public class BasicShape
 	public BasicShape (BasicShape clone)
 	{
 		this (clone.vectors, clone.adjMatrix);
+		mGlue = clone.mGlue;
 	}
 	
 	/**
@@ -89,15 +90,38 @@ public class BasicShape
 		ArrayList <Line> lines = new ArrayList<Line>();
 		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
 		{
-			ArrayList <IntegerMatrix> connected = lookUpConnections(cVertex);
-			for (int cConnect = 0; cConnect < connected.size(); ++cConnect)
+			
+			for (int cConnect = cVertex; cConnect < getNumberOfVertices(); ++cConnect)
 			{
-				Line l = new Line (new Glue (getVertex(cVertex)), new Glue (connected.get (cConnect)));
-				lines.add(l);
+				if (adjMatrix.getCell(cVertex, cConnect).equals(new Integer (1)))
+					lines.add (new Line (new Glue (getVertex (cVertex)), new Glue (getVertex (cConnect))));
 			}
 				
 		}
 		return lines;
+	}
+	
+
+	public ArrayList <Rectangle> getRectangles()
+	{
+		ArrayList <Rectangle> rects = new ArrayList<Rectangle>();
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+		{
+			for (int cOppoVertex = cVertex + 1; cOppoVertex < getNumberOfVertices(); ++cOppoVertex)
+			{
+				int cConn = cVertex + 1, sharedConn = 0;
+				while (cConn < getNumberOfVertices() && sharedConn < 2)
+				{
+					if (adjMatrix.getCell(cVertex, cConn).equals(1) && 
+						adjMatrix.getCell(cOppoVertex, cConn).equals(1))
+						++sharedConn;
+					++cConn;
+				}
+				if (sharedConn == 2)
+					rects.add(new Rectangle (new Glue (getVertex (cVertex)), new Glue (getVertex (cOppoVertex))));
+			}
+		}
+		return rects;
 	}
 	
 	/**
@@ -147,14 +171,11 @@ public class BasicShape
 	
 	/**
 	 * @param index index of vertex
-	 * @return vertex at index as clone of original
+	 * @return vertex at index translated by glued offset
 	 */
 	public IntegerMatrix getVertex (int index)
 	{
-		IntegerMatrix vertex = vectors.get(index).clone();
-		for (int cCoord = 0; cCoord < mGlue.getDimension(); ++cCoord)
-			vertex.setCell(cCoord, 0, vertex.getCell(cCoord, 0) + mGlue.getPosition().get(cCoord));
-		return vertex;
+		return vectors.get(index).clone();
 	}
 	
 	/**
@@ -278,7 +299,7 @@ public class BasicShape
 		if (!numberOfMH(vectors)) 
 			throw new BadNumberOfRowsException ("vectors don't have the same dimension");
 
-		for(int i=0; i<vectors.size(); i++){
+		for(int i=0; i<vectors.get(0).getRows(); i++){
 
 			int max = maximum (vectors,i);
 			int min = minimum (vectors,i);
@@ -302,11 +323,13 @@ public class BasicShape
 	}
 	
 	/**
-	 * Glues shape to g
+	 * Glues shape to g and translates all vertices
 	 * @param g position
 	 */
 	public void glue (Glue g)
 	{
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+			vectors.set(cVertex, g.translateMat(vectors.get(cVertex), mGlue));
 		mGlue = g.clone();
 	}
 	
@@ -315,7 +338,7 @@ public class BasicShape
 		p.println ("Printing vertices of basic shape");
 		for (int cVec = 0; cVec < getNumberOfVertices(); ++cVec)
 		{
-			p.println ("vector");
+			p.println ("vector " + cVec + " ");
 			vectors.get(cVec).print(System.out);
 			p.print("connections: ");
 			for (int cConnect = 0; cConnect < getNumberOfVertices(); ++cConnect)
@@ -333,26 +356,32 @@ public class BasicShape
 	protected void addShape (Block b)
 	{
 		BasicShape bs = (BasicShape)b;
-		//adjust for new data
 		int prevNumVertices = getNumberOfVertices();
+		//edit vertex list
 		addVertices (bs.vectors);
-		IntegerMatrix newAdjMat = new IntegerMatrix (vectors.size(), vectors.size());
-		newAdjMat.copyValues(adjMatrix, 0, 0, 0, 0, adjMatrix.getRows(), adjMatrix.getColumns());
+		//enlarge free connections list
+		for (int newAdded = 0; newAdded < vectors.size() - prevNumVertices; ++newAdded)
+			mPossibleConnections.add (new ArrayList<RelatPos>(Arrays.asList (RelatPos.values())));
+		//edit adjacency matrix
+		IntegerMatrix oldAdjMat = adjMatrix;
+		adjMatrix = new IntegerMatrix (vectors.size(), vectors.size());
+		adjMatrix.copyValues(oldAdjMat, 0, 0, 0, 0, oldAdjMat.getRows(), oldAdjMat.getColumns());
 		//iterate through newly added vertices
-		for (int cVertex = prevNumVertices; cVertex < getNumberOfVertices(); ++cVertex)
+		
+		for (int cNewVertex = 0; cNewVertex < bs.getNumberOfVertices(); ++cNewVertex)
 		{
-			int indBSVertex = bs.getVertexIndex(getVertex (cVertex));
-			ArrayList <IntegerMatrix> connected = bs.lookUpConnections (indBSVertex);
+			int iVertex = this.getVertexIndex(bs.getVertex(cNewVertex));
+			assert (iVertex < getNumberOfVertices());
+			ArrayList<IntegerMatrix> connected = bs.lookUpConnections(cNewVertex);
 			//copy connections from bs
 			for (IntegerMatrix connection : connected)
 			{
-				int connectionIndex = this.getVertexIndex (connection);
-				newAdjMat.setCell(cVertex, connectionIndex, 1);
-				newAdjMat.setCell(connectionIndex, cVertex, 1);
+				int connectionIndex = this.getVertexIndex(connection);
+				adjMatrix.setCell(iVertex, connectionIndex, 1);
+				adjMatrix.setCell(connectionIndex, iVertex, 1);
 			}
-			resetConnections (cVertex);
+			resetConnections(iVertex);
 		}
-		adjMatrix = newAdjMat;
 	}
 	
 	/**

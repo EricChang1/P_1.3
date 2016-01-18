@@ -38,7 +38,10 @@ public class Glue implements Cloneable
 		if (pos.size() != 3) throw new GlueException("This ArrayList does not contain the appropriate number of positions");
 	}
 	
-	
+	/**
+	 * constructor from matrix
+	 * @param vec n x 1 matrix containing position vector
+	 */
 	public Glue (Matrix<Integer> vec)
 	{
 		if (vec.getColumns() != 1)
@@ -58,6 +61,22 @@ public class Glue implements Cloneable
 	*/
 	public ArrayList<Integer> getPosition(){
 			return (ArrayList<Integer>) pos.clone();
+	}
+	
+	/**
+	 * @param v matrix to translate
+	 * @return matrix v translated by position held by the object
+	 */
+	public IntegerMatrix translateMat (IntegerMatrix v, Glue before)
+	{
+		IntegerMatrix trans = v.clone();
+		for (int cRow = 0; cRow < trans.getRows(); ++cRow)
+		{
+			int diff = this.getPosition(cRow) - before.getPosition(cRow);
+			for (int cCol = 0; cCol < trans.getColumns(); ++cCol)
+				trans.setCell(cRow, cCol, trans.getCell(cRow, cCol) + diff);
+		}
+		return trans;
 	}
 	
 	public String toString()

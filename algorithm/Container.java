@@ -185,17 +185,30 @@ public class Container extends Block
 	**/
 	public boolean checkPositionOverlap (Block block, Glue pos)
 	{
-		ArrayList<Line> blockLines = block.getConnectingLines();
+		Glue prevPos = block.getGlue();
+		block.glue(pos);
+		ArrayList<Rectangle> blockSides = block.getRectangles();
 		ArrayList <Line> containerLines = this.getConnectingLines();
 		
-		for (Line lBlock : blockLines)
+		for (Rectangle sBlock : blockSides)
 		{
 			for (Line lContainer : containerLines)
 			{
-				if (lBlock.doIntersect(lContainer) && !lBlock.isSameOrientation(lContainer))
-					return false;
+				//Problem: need to check whether line from block interesects a place within the container => rectangle class
+				IntersectionSolver is = new IntersectionSolver(sBlock, lContainer);
+				if (is.getSolutionType() == IntersectionSolver.Result.ONE && is.isWithinBounds())
+				{
+					Glue isect = is.getIntersection();
+					//if intersection is not begin or end
+					if (block.getVertexIndex(isect.toVector()) >= block.getNumberOfVertices())
+					{
+						block.glue (prevPos);
+						return false;
+					}
+				}
 			}
 		}
+		block.glue (prevPos);
 		return true;
 	}
 	
@@ -208,7 +221,7 @@ public class Container extends Block
 		for (int cCoord = 0; cCoord < mStartingPosition.getDimension(); ++cCoord)
 		{
 			int coord = mStartingPosition.getPosition(cCoord);
-			if (coord < 0 && coord > getDimensions(cCoord))
+			if (coord < 0 || coord > getDimensions(cCoord))
 				return false;
 		}
 		return true;

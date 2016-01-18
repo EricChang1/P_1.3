@@ -43,7 +43,11 @@ public abstract class GeoShape
 	/**
 	 * @param dimension dimension of subspace the shape is in
 	 */
-	public GeoShape (int dimension) { mDimension = dimension; }
+	public GeoShape (Glue p1, Glue p2) 
+	{ 
+		mP1 = p1.clone();
+		mP2 = p2.clone();
+	}
 	
 	/**
 	 * @return list of vectors defining the shape
@@ -51,14 +55,25 @@ public abstract class GeoShape
 	public abstract ArrayList <DoubleMatrix> getVectors();
 	
 	/**
-	 * @return list of points that delimit the shape
-	 */
-	public abstract ArrayList <IntegerMatrix> getPoints();
-	
-	/**
 	 * @return matrix representing equation for subspace of shape (without delimiters)
 	 */
 	public abstract DoubleMatrix loadEquationMatrix();
+	
+	/**
+	 * @return first fixed point
+	 */
+	public IntegerMatrix getFirst()
+	{
+		return mP1.toVector();
+	}
+	
+	/**
+	 * @return second fixed point
+	 */
+	public IntegerMatrix getSecond()
+	{
+		return mP2.toVector();
+	}
 	
 	/**
 	 * @param g2 shape to check for intersection with this for
@@ -69,10 +84,10 @@ public abstract class GeoShape
 		DoubleMatrix eqT = loadEquationMatrix();
 		DoubleMatrix eqG = g2.loadEquationMatrix();
 		eqG.getScalarMatrix(-1.0, new DoubleMatrix (eqG.getRows(), eqG.getRows())).multiply(eqG, eqG);
-		DoubleMatrix eq = new DoubleMatrix (mDimension, eqT.getColumns() + eqG.getColumns() - 1);
+		DoubleMatrix eq = new DoubleMatrix (getDimension(), eqT.getColumns() + eqG.getColumns() - 1);
 		eq.copyValues(eqT, 0, 0, 0, 0, eqT.getRows(), eqT.getColumns() - 1);
 		eq.copyValues(eqG, 0, eqT.getColumns() - 1, 0, 0, eqG.getRows(), eqG.getColumns() - 1);
-		for (int cDim = 0; cDim < mDimension; ++cDim)
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
 		{
 			double fixCoord = -(eqG.getCell(cDim, eqG.getColumns() - 1) + eqT.getCell(cDim, eqT.getColumns() - 1));
 			eq.setCell(cDim, eq.getColumns() - 1, fixCoord);
@@ -83,7 +98,7 @@ public abstract class GeoShape
 	/**
 	 * @return dimension of the subspace the shape is in
 	 */
-	public int getDimension() { return mDimension; }
+	public int getDimension() { return mP1.getDimension(); }
 	
 	/**
 	 * @param g2 shape to compare orientation with
@@ -126,22 +141,35 @@ public abstract class GeoShape
 	 */
 	public boolean isInRange (Glue p)
 	{
-		ArrayList <IntegerMatrix> points = getPoints();
-		for (int cDim = 0; cDim < mDimension; ++cDim)
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
 		{
-			int max = points.get(0).getCell(cDim, 0);
-			int min = max;
-			for (int cPoints = 1; cPoints < points.size(); ++cPoints)
-			{
-				max = Math.max(max, points.get(cPoints).getCell(cDim, 0));
-				min = Math.min(min, points.get(cPoints).getCell(cDim, 0));
-			}
-			
+			int max = Math.max (getFirst().getCell (cDim, 0), getSecond().getCell (cDim, 0));
+			int min = Math.min (getFirst().getCell (cDim, 0), getSecond().getCell (cDim, 0));
 			if (p.getPosition(cDim) < min || p.getPosition(cDim) > max)
 				return false;
 		}
 		return true;
 	}
 	
-	private int mDimension;
+	
+	/**
+	 * @param g shape to check range overlapping for
+	 * @return true if ranges overlap
+	 */
+	public boolean doesRangeOverlap (GeoShape g)
+	{
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
+		{
+			int minT, maxT, minG, maxG;
+			minT = Math.min(this.getFirst().getCell(cDim, 0), this.getSecond().getCell(cDim, 0));
+			maxT = Math.max(this.getFirst().getCell(cDim, 0), this.getSecond().getCell(cDim, 0));
+			minG = Math.min(g.getFirst().getCell(cDim, 0), g.getSecond().getCell(cDim, 0));
+			maxG = Math.max(g.getFirst().getCell(cDim, 0), g.getSecond().getCell(cDim, 0));
+			if ((minG < minT || maxG > maxT) && (minT < minG || maxT > maxG))
+				return false;
+		}
+		return true;
+	}
+	
+	private Glue mP1, mP2;
 }

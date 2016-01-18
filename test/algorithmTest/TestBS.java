@@ -12,7 +12,8 @@ public class TestBS
 	{ 	
 		TestBS test = new TestBS();
 		//error test.testRotation();
-		test.testAdding();
+		//test.testAdding();
+		test.testSideDivision();
 	}
 	
 	public static BasicShape constructTriangle (IntegerMatrix v1, IntegerMatrix v2, IntegerMatrix v3)
@@ -45,6 +46,9 @@ public class TestBS
 		v3.setCell(1, 0, 1);
 		
 		mBs = constructTriangle (v1, v2, v3);
+		
+		ArrayList <IntegerMatrix> cubeVecs = Container.computeInitDimVectors(2, 3, 4);
+		mCube = new BasicShape (cubeVecs, Container.computeInitAdjacencyMatrix(cubeVecs));
 	}
 	
 	public void testRotation()
@@ -61,6 +65,13 @@ public class TestBS
 		mBs.print(System.out);
 	}
 	
+	public void testSideDivision()
+	{
+		ArrayList <Rectangle> sides = mCube.getRectangles();
+		for (Rectangle side : sides)
+			System.out.println ("Rectangle spanned by " + new Glue (side.getFirst()) + " and " + new Glue (side.getSecond()));
+	}
+	
 	public void testAdding()
 	{
 		IntegerMatrix v1, v2, v3;
@@ -71,16 +82,17 @@ public class TestBS
 		v2.setCell (0, 0, -1);
 		v3.setCell (1, 0, -1);
 		
-		BasicShape addShape = constructTriangle (v1, v2, v3);
+		Block addShape = new Block (constructTriangle (v1, v2, v3), 0);
 		System.out.println ("Trying to add");
 		addShape.print(System.out);
 		
 		System.out.println ("Before adding");
 		mBs.print (System.out);
+		//change to public for testing
 		mBs.addShape (addShape);
 		System.out.println ("After adding");
 		mBs.print (System.out);
 	}
 	
-	private BasicShape mBs;
+	private BasicShape mBs, mCube;
 }
