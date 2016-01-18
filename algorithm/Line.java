@@ -1,67 +1,15 @@
 package algorithm;
 
+import java.util.ArrayList;
+
 import algorithm.Matrix.*;
 
 /**
  * class modelling a line
  * @author martin
  */
-public class Line 
+public class Line extends GeoShape
 {
-	
-	@SuppressWarnings("serial")
-	public static class LineDimensionMismatchException extends IllegalArgumentException
-	{
-		public LineDimensionMismatchException () {}
-		
-		public LineDimensionMismatchException (String message) { super (message); }
-	}
-	
-	/**
-	 * scales down v to length 1
-	 * @param v vector given
-	 * @return v scaled to length 1
-	 */
-	public static DoubleMatrix normVector (DoubleMatrix v)
-	{
-		DoubleMatrix normedV = v.clone();
-		double length = Math.sqrt (v.vectorProduct (v.getColumn(0), v.getColumn(0)));
-		for (int cRow = 0; cRow < v.getRows(); ++cRow)
-			normedV.setCell (cRow, 0, v.getCell (cRow, 0) / length);
-		return normedV;
-	}
-	
-	/**
-	 * Calculates parameter s for equation
-	 * p1 + r*v1 = p2 + s * v2
-	 * @param p1 start point of line 1
-	 * @param p2 start point of line 2
-	 * @param v1 vector defining line 1
-	 * @param v2 vector defining line 2
-	 * @param ind1 dimension index 1
-	 * @param ind2 dimension index 2
-	 * @return
-	 */
-	public static double calcLineIntersectParam (Glue p1, Glue p2, DoubleMatrix v1, DoubleMatrix v2, int ind1, int ind2)
-	{
-		double numSum1 = v1.getCell(ind1, 0) * (p1.getPosition().get(ind2) - p2.getPosition().get(ind2));
-		double numSum2 = v1.getCell(ind2, 0) * (p2.getPosition().get(ind1) - p1.getPosition().get(ind1));
-		double denom = v2.getCell(ind2, 0) * v1.getCell (ind1, 0) - v2.getCell(ind1, 0) * v1.getCell(ind2, 0);
-		return ((numSum1 + numSum2) / denom);
-	}
-	
-	/**
-	 * Checks whether two floating types are equal, using a static epsilon
-	 * @param d1 float 1
-	 * @param d2 float 2
-	 * @return whether float 1 == float 2
-	 */
-	public static boolean floatEquals (double d1, double d2)
-	{
-		double e = 0.00001;
-		return (d1 - d2 >= -e && d1 - d2 <= e);
-	}
-	
 	/**
 	 * constructs line defined between p1 and p2
 	 * @param p1 start point of the line
@@ -69,6 +17,7 @@ public class Line
 	 */
 	public Line (Glue p1, Glue p2)
 	{
+		super (p1.getDimension());
 		mP1 = p1.clone();
 		mP2 = p2.clone();
 		mNormedLineVector = new DoubleMatrix (mP1.getDimension(), 1);
@@ -78,73 +27,43 @@ public class Line
 	}
 	
 	/**
-	 * @return starting point of line
+	 * @return 2 column matrix: [lineVector, first position vector]
 	 */
-	public Glue getFirst()
+	public DoubleMatrix loadEquationMatrix()
 	{
-		return mP1;
+		DoubleMatrix eq = new DoubleMatrix (mP1.getDimension(), 2);
+		for (int cDim = 0; cDim < mP1.getDimension(); ++cDim)
+		{
+			eq.setCell(cDim, 0, this.mNormedLineVector.getCell(cDim, 0));
+			eq.setCell(cDim, 1, (double) (mP1.getPosition(cDim)));
+		}
+		return eq;
 	}
 	
 	/**
-	 * @return end point of line
+	 * @return a n x 1 matrix representing the normed vector defining this line
 	 */
-	public Glue getSecond()
+	public ArrayList <DoubleMatrix> getVectors()
 	{
-		return mP2;
+		ArrayList <DoubleMatrix> vecs = new ArrayList<DoubleMatrix>();
+		vecs.add (mNormedLineVector.clone());
+		return vecs;
 	}
 	
-	public boolean doIntersect (Line l2)
+	/**
+	 * @return a list containing the start and end point of this line
+	 */
+	public ArrayList <IntegerMatrix> getPoints()
 	{
-		if (l2.mP1.getDimension() != this.mP1.getDimension())
-			throw new LineDimensionMismatchException ("l2 does not have same dimension");
-		
-		//for begin points p1, p2 belonging to two different lines
-		//for vectors v1, v2 belonging to two different lines this needs to hold
-		//p1 + r * v1 = p2 + s * v2
-		//for every dimension index x, y, s and r need to be the same (it is sufficient to check 1)
-		//s = (v1(x)(p2(y) - p1(y)) - v1(y)(p2(x) - p1(x))) / v2(y)v1(x) - v2(x)v1(y)
-
-		double s = Double.MAX_VALUE;
-		for (int cCoord = 1; cCoord < mP1.getDimension(); ++cCoord)
-		{
-			if (this.mNormedLineVector.getCell (cCoord, 0) != 0 || l2.mNormedLineVector.getCell(cCoord, 0) != 0)
-			{
-				double testS = calcLineIntersectParam(this.mP1, l2.mP1, this.mNormedLineVector, l2.mNormedLineVector, 0, cCoord);
-				if (s == Double.MAX_VALUE)
-					s = testS;
-				else if (!floatEquals (s, testS))
-					return false;
-			}
-			//if vector entries are 0
-			else
-			{
-				int l1p1 = Math.min(this.mP1.getPosition().get(cCoord), this.mP2.getPosition().get(cCoord));
-				int l1p2 = Math.max(this.mP1.getPosition().get(cCoord), this.mP2.getPosition().get(cCoord));
-				int l2p1 = Math.min(l2.mP1.getPosition().get(cCoord), l2.mP2.getPosition().get(cCoord));
-				int l2p2 = Math.max(l2.mP1.getPosition().get(cCoord), l2.mP2.getPosition().get(cCoord));
-				if (!((l1p1 >= l2p1 && l1p1 <= l2p2) || (l2p1 >= l1p1 && l2p1 <= l1p2)))
-					return false;	
-			}
-		}
-		if (s == Double.MAX_VALUE)
-			return true;
-		
-		if (!l2.isScalarOnLine (s))
-			return false;
-		
-		//calculate parameter r using parameter s
-		double r = l2.mP1.getPosition().get(0) + s * l2.mNormedLineVector.getCell(0, 0);
-		r -= this.mP1.getPosition().get(0);
-		r /= this.mNormedLineVector.getCell(0, 0);
-		if (!this.isScalarOnLine(r))
-			return false;
-		
-		return true;
+		ArrayList <IntegerMatrix> points = new ArrayList<IntegerMatrix>();
+		points.add (mP1.toVector());
+		points.add (mP2.toVector());
+		return points;
 	}
 	
 	/**
 	 * @param l2 line to compare orientation with
-	 * @return true if this and l2 are paralell (or possibly identical
+	 * @return true if this and l2 are parallel (or possibly identical)
 	 */
 	public boolean isSameOrientation (Line l2)
 	{
@@ -152,25 +71,6 @@ public class Line
 		for (int cRow = 0; cRow < mNormedLineVector.getRows(); ++cRow)
 			neg.setCell(cRow, 0, -mNormedLineVector.getCell (cRow, 0));
 		return (this.mNormedLineVector.equals (l2.mNormedLineVector) || neg.equals(l2.mNormedLineVector));
-	}
-	
-	/**
-	 * @param scalar strictly positive scalar of normed vector in line
-	 * @return true if mP1 + mNormedLineVector * scalar < mP2
-	 */
-	public boolean isScalarOnLine (double scalar)
-	{
-		if (scalar <= 0)
-			return false;
-		for (int cDim = 0; cDim < mP1.getDimension(); ++cDim)
-		{
-			double coord = (double)mP1.getPosition().get(cDim) + mNormedLineVector.getCell(cDim, 0) * scalar;
-			if (mP1.getPosition().get(cDim) <= mP2.getPosition().get(cDim) && coord > mP2.getPosition().get(cDim))
-				return false;
-			if (mP1.getPosition().get(cDim) >= mP2.getPosition().get(cDim) && coord < mP2.getPosition().get(cDim))
-				return false;
-		}
-		return true;
 	}
 	
 	private Glue mP1, mP2;

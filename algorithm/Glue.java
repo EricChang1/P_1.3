@@ -9,6 +9,7 @@ public class Glue implements Cloneable
 
 	/** Nested class to create a custom exception
 	 */
+	@SuppressWarnings("serial")
 	static class GlueException extends IllegalArgumentException{
 		
 		/**Exception constructor
@@ -56,7 +57,35 @@ public class Glue implements Cloneable
 	* @return Position of glue
 	*/
 	public ArrayList<Integer> getPosition(){
-			return pos;
+			return (ArrayList<Integer>) pos.clone();
+	}
+	
+	public String toString()
+	{
+		String s = "position ";
+		for (int cCoord = 0; cCoord < getDimension(); ++cCoord)
+			s += getPosition(cCoord) + " ";
+		return s;
+	}
+	
+	/**
+	 * @param index index of coordinate
+	 * @return coordinate at index
+	 */
+	public int getPosition (int index)
+	{
+		return pos.get(index);
+	}
+	
+	/**
+	 * @return the coordinates in vector form as a integer matrix of size dim x 1
+	 */
+	public IntegerMatrix toVector()
+	{
+		IntegerMatrix vec = new IntegerMatrix (getDimension(), 1);
+		for (int cCoord = 0; cCoord < getDimension(); ++cCoord)
+			vec.setCell (cCoord, 0, getPosition().get(cCoord));
+		return vec;
 	}
 	
 	/**
@@ -67,7 +96,17 @@ public class Glue implements Cloneable
 		return pos.size();
 	}
 	
+	public boolean equals (Glue comp)
+	{
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
+		{
+			if (this.getPosition(cDim) != comp.getPosition(cDim))
+				return false;
+		}
+		return true;
+	}
+	
+	
 		
 	private ArrayList<Integer> pos;
-
 }

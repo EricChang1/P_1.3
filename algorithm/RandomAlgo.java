@@ -2,7 +2,6 @@ package algorithm;
 
 import java.util.ArrayList;
 import java.util.Random;
-import algorithm.Matrix.*;
 
 /**
  * @author martin
@@ -10,18 +9,30 @@ import algorithm.Matrix.*;
  *	chosen piece gets placed at random location
  *	pieces are placed until no vertex is available anymore
  */
-public class RandomAlgo implements Runnable
+public class RandomAlgo extends Algorithm
 {
 	/**
-	 * constructs algo from container and pieces
-	 * @param container container to place pieces in
-	 * @param pieces pieces available
+	 * @return shuffled list of indices to vertices in container
 	 */
-	public RandomAlgo (Container container, <Resourceclass> pieces)
+	public ArrayList <Integer> getShuffledIndices (int maxIndex)
 	{
-		mContainer = container.clone();
-		mPieces = pieces.clone();
-		mPlacingDone = false;
+		ArrayList <Integer> indices = new ArrayList <Integer>(); 
+		for (int cIndex = 0; cIndex < maxIndex; ++cIndex)
+			indices.add (new Integer (cIndex));
+		Random rand = new Random (System.currentTimeMillis());
+		for (int cShuffle = 0; cShuffle < maxIndex; ++cShuffle)
+		{
+			int iSwap1 = 0, iSwap2 = 0;
+			while (iSwap1 == iSwap2)
+			{
+				iSwap1 = rand.nextInt(indices.size()); 
+				iSwap2 = rand.nextInt(indices.size());
+			}
+			Integer temp = indices.get(iSwap1);
+			indices.set (iSwap1, indices.get(iSwap2));
+			indices.set (iSwap2, temp);
+		}
+		return indices;
 	}
 	
 	@Override
@@ -30,66 +41,49 @@ public class RandomAlgo implements Runnable
 	 */
 	public void run() 
 	{
-		while (!mPlacingDone)
+		super.run();
+		while (!isAlgoDone())
 		{
-			ArrayList <Integer> shuffledVertices = getShuffledVertexList();
-			doRandomPlacements(shuffledVertices);
+			ArrayList <Integer> shuffledVertices = getShuffledIndices(getContainer().getNumberOfVertices());
+			ArrayList<Integer> shuffledPieces = getShuffledIndices(getPieces().size());
+			doRandomPlacements(shuffledVertices, shuffledPieces);
 		}
 		
-	}
-	
-	/**
-	 * @return shuffled list of indices to vertices in container
-	 */
-	private ArrayList <Integer> getShuffledVertexList()
-	{
-		ArrayList <Integer> verts = new ArrayList <Integer>(); 
-		for (int cVertex = 0; cVertex < mContainer.getNumberOfVertices(); ++cVertex)
-			verts.add (new Integer (cVertex));
-		Random rand = new Random (System.currentTimeMillis());
-		for (int cShuffle = 0; cShuffle < mContainer.getNumberOfVertices(); ++cShuffle)
-		{
-			int iSwap1 = 0, iSwap2 = 0;
-			while (iSwap1 == iSwap2)
-			{
-				iSwap1 = rand.nextInt(verts.size()); 
-				iSwap2 = rand.nextInt(verts.size());
-			}
-			Integer temp = verts.get(iSwap1);
-			verts.set (iSwap1, verts.get(iSwap2));
-			verts.set (iSwap2, temp);
-		}
-		return verts;
 	}
 	
 	/**
 	 * tries to place a piece at vertices in vertexList until possible
 	 * @param vertexList list of vertices giving order in which vertices are tried
 	 */
-	private void doRandomPlacements (ArrayList <Integer> vertexList)
+	private void doRandomPlacements (ArrayList <Integer> vertexList, ArrayList<Integer> blockList)
 	{
-		Random gen = new Random();
 		boolean placed = false;
 		int iVertex = 0;
 		while (!placed && iVertex < vertexList.size())
 		{
-			Block place = mPieces.getBlock();
-			ArrayList <Position> relats = mContainer.getRelativePlacements(place, vertexList.get (iVertex));
-			Position randPos = relats.get (gen.nextInt (relats.size()));
-			if (mContainer.checkPositionOverlap (place, randPos))
+			int iBlock = 0;
+			while (!placed && iBlock < blockList.size())
 			{
-				mContainer.placeBlock(place, randPos);
-				placed = true;
+				Resource res = getPieces().get(blockList.get(iBlock));
+				if (!res.isEmpty())
+				{
+					//be careful about copying here
+					ArrayList<Position> relats = getContainer().getRelativePlacements(res.getBlock(), vertexList.get(iVertex));
+					for (Position relat : relats)
+					{
+						if (getContainer().checkPositionOverlap(res.getBlock(), relat))
+						{
+							getContainer().placeBlock(res.getBlock(), relat);
+							placed = true;
+						}
+					}
+				}
+				++iBlock;
 			}
-			else
-				++iVertex;
+			++iVertex;
 		}
 		
 		if (!placed)
-			mPlacingDone = true;
+			setAlgoDone();
 	}
-	
-	private Container mContainer;
-	private <ResourceClass> mPieces;
-	private boolean mPlacingDone;
 }

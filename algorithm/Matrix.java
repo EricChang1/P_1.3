@@ -91,13 +91,14 @@ public abstract class Matrix <T extends Number> implements Cloneable
 				arr[cRow] = getCell (cRow, col);
 			return arr;
 		}
-
+		
 		/**
-		 * @return zero according to data type
+		 * @param number primitive value
+		 * @return integer object of value number
 		 */
-		public Integer getZero()
+		public Integer getNumber (double number)
 		{
-			return new Integer(0);
+			return new Integer ((int) number);
 		}
 		
 		/**
@@ -171,13 +172,14 @@ public abstract class Matrix <T extends Number> implements Cloneable
 				arr[cRow] = getCell (cRow, row);
 			return arr;
 		}
-		
+
 		/**
-		 * @return zero according to data type
+		 * @param number primitive value
+		 * @return double object of value number
 		 */
-		public Double getZero()
+		public Double getNumber (double number)
 		{
-			return new Double (0.0);
+			return new Double (number);
 		}
 		
 		@Override
@@ -211,7 +213,15 @@ public abstract class Matrix <T extends Number> implements Cloneable
 			}
 			return true;
 		}
+		
+		public void setCell (int row, int col, double val)
+		{
+			int roundScaled = (int) (val * Math.pow(10, PRECISION));
+			super.setCell(row, col, roundScaled / Math.pow (10, PRECISION));
+		}
 	}
+	
+	public static final int PRECISION = 5;
 	
 	/** Do nothing constructor which needs to be overridden by subclasses
 	 * @param rows rows of matrix
@@ -221,19 +231,6 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		mStoreArray = null;
 	}
-	
-	/**
-	 * @param v1 vector
-	 * @param v2 vector
-	 * @return vector product of v1 and v2
-	 * @throws MatrixDimensionMismatchException
-	 */
-	public abstract T vectorProduct (T[] v1, T[] v2) throws MatrixDimensionMismatchException;
-	
-	/**
-	 * @return zero value according to data type
-	 */
-	public abstract T getZero();
 	
 	//accessor methods
 	/**
@@ -257,6 +254,18 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	public abstract Matrix<T> clone();
 	
 	/**
+	 * @param scalar number the scalar matrix should scale by
+	 * @param scalarMat object of appropriate size initialized with 0s in which to store the scalar matrix
+	 * @return
+	 */
+	public Matrix<T> getScalarMatrix (double scalar, Matrix<T> scalarMat)
+	{
+		for (int cEntry = 0; cEntry < scalarMat.getRows(); ++cEntry)
+			scalarMat.setCell(cEntry, cEntry, getNumber (scalar));
+		return scalarMat;
+	}
+	
+	/**
 	 * @param row row index
 	 * @return array containing elements of row
 	 */
@@ -272,6 +281,20 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	 * @return array containing elements of column
 	 */
 	public abstract T[] getColumn (int col);
+	
+	/**
+	 * @param v1 vector
+	 * @param v2 vector
+	 * @return vector product of v1 and v2
+	 * @throws MatrixDimensionMismatchException
+	 */
+	public abstract T vectorProduct (T[] v1, T[] v2) throws MatrixDimensionMismatchException;
+	
+	/**
+	 * @param number primitive value
+	 * @return object of corresponding type of value of number
+	 */
+	public abstract T getNumber(double number);
 	
 	/** @param row row index
 	 * 	@param col column index
@@ -295,7 +318,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		int cnt = 0;
 		for (int cCol = 0; cCol < getColumns(); ++cCol)
 		{
-			if (!getCell(rowIndex, cCol).equals (getZero()))
+			if (!getCell(rowIndex, cCol).equals (getNumber(0.0)))
 				++cnt;
 		}
 		return cnt;
@@ -312,7 +335,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		int cnt = 0;
 		for (int cCol = startIndex; cCol <= stopIndex; ++cCol)
 		{
-			if (!getCell(rowIndex, cCol).equals (getZero()))
+			if (!getCell(rowIndex, cCol).equals (getNumber(0.0)))
 				++cnt;
 		}
 		return cnt;
@@ -327,7 +350,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		int cnt = 0;
 		for (int cRow = 0; cRow < getRows(); ++cRow)
 		{
-			if (!getCell (cRow, colIndex).equals (getZero()))
+			if (!getCell (cRow, colIndex).equals (getNumber(0.0)))
 				++cnt;
 		}
 		return cnt;
@@ -344,7 +367,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 		int cnt = 0;
 		for (int cRow = startIndex; cRow <= stopIndex; ++cRow)
 		{
-			if (!getCell (cRow, colIndex).equals (getZero()))
+			if (!getCell (cRow, colIndex).equals (getNumber(0.0)))
 				++cnt;
 		}
 		return cnt;
@@ -404,7 +427,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cCol = 0; cCol < getColumns(); cCol++)
 		{
-			if (getCell (row, cCol).equals (getZero())) 
+			if (getCell (row, cCol).equals (getNumber (0.0))) 
 				return false;
 		}
 		return true;
@@ -418,7 +441,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cRow = 0; cRow < getRows(); ++cRow) 
 		{
-			if (getCell (cRow, col).equals (getZero())) 
+			if (getCell (cRow, col).equals (getNumber (0.0))) 
 				return false;
 		}
 		return true;
@@ -432,7 +455,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cCol = 0; cCol < getColumns(); cCol++)
 		{
-			if (!getCell (row, cCol).equals (getZero())) 
+			if (!getCell (row, cCol).equals (getNumber (0.0))) 
 				return false;
 		}
 		return true;
@@ -446,7 +469,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	{
 		for (int cRow = 0; cRow < getRows(); ++cRow) 
 		{
-			if (!getCell (cRow, col).equals (getZero())) 
+			if (!getCell (cRow, col).equals (getNumber (0.0))) 
 				return false;
 		}
 		return true;
