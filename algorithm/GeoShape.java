@@ -6,6 +6,14 @@ import java.util.ArrayList;
 
 public abstract class GeoShape 
 {
+	@SuppressWarnings("serial")
+	public static class BadVectorsException extends IllegalArgumentException
+	{
+		public BadVectorsException(){}
+		
+		public BadVectorsException (String message) { super (message); }
+	}
+	
 	/**
 	 * scales down v to length 1
 	 * @param v vector given
