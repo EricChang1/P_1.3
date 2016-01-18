@@ -45,7 +45,7 @@ public class Scaler
 				Number numValue = vectors.get(i).getCell(j, 1); //value in current cell
 				double currentValue = numValue.doubleValue();
 				int digits = String.valueOf(currentValue).length(); //number of digits in current cell
-				int intLength = (int) (Math.floor(currentValue)); //number of digits in cell ignoring decimals
+				int intLength = String.valueOf(Math.floor(currentValue)).length(); //number of digits in cell ignoring decimals
 				if (smallestValue == 0.0 ||smallestValue>currentValue)
 				{
 					smallestValue = currentValue;
