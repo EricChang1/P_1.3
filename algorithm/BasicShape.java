@@ -175,10 +175,7 @@ public class BasicShape
 	 */
 	public IntegerMatrix getVertex (int index)
 	{
-		IntegerMatrix vertex = vectors.get(index).clone();
-		for (int cCoord = 0; cCoord < mGlue.getDimension(); ++cCoord)
-			vertex.setCell(cCoord, 0, vertex.getCell(cCoord, 0) + mGlue.getPosition().get(cCoord));
-		return vertex;
+		return vectors.get(index).clone();
 	}
 	
 	/**
@@ -326,11 +323,13 @@ public class BasicShape
 	}
 	
 	/**
-	 * Glues shape to g
+	 * Glues shape to g and translates all vertices
 	 * @param g position
 	 */
 	public void glue (Glue g)
 	{
+		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+			vectors.set(cVertex, g.translateMat(vectors.get(cVertex), mGlue));
 		mGlue = g.clone();
 	}
 	
@@ -369,7 +368,7 @@ public class BasicShape
 		adjMatrix.copyValues(oldAdjMat, 0, 0, 0, 0, oldAdjMat.getRows(), oldAdjMat.getColumns());
 		//iterate through newly added vertices
 		
-		for (int cNewVertex = 0; cNewVertex < b.getNumberOfVertices(); ++cNewVertex)
+		for (int cNewVertex = 0; cNewVertex < bs.getNumberOfVertices(); ++cNewVertex)
 		{
 			int iVertex = this.getVertexIndex(bs.getVertex(cNewVertex));
 			assert (iVertex < getNumberOfVertices());

@@ -484,7 +484,7 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	 */
 	public void setCell (int row, int col, T value) 
 	{
-		if (row < 0 || row > getRows() || col < 0 || col > getColumns())
+		if (row < 0 || row >= getRows() || col < 0 || col >= getColumns())
 			throw new MatrixOutOfBoundsException ("Index " + row + " " + col + "out of bounds in matrix of size " + getRows() + " " + getColumns());
 		mStoreArray[row][col] = value;
 	}
