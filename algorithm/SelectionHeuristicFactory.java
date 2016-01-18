@@ -1,7 +1,7 @@
 package algorithm;
 
 public class SelectionHeuristicFactory {
-	public SelectionHeuristic getHeuristic(SelectionHeuristicType h)
+	public SelectionHeuristic getHeuristicSelec(SelectionHeuristicType h)
 	{
 		switch(h)
 		{
