@@ -47,9 +47,13 @@ public class IntersectionSolver
 			throw new IntersectionSolverException ("non solvable linear equations");
 		else if (mSolutionType == Result.INFINITE)
 			throw new IntersectionSolverException ("system has infinite many solutions");
-		DoubleMatrix p = new DoubleMatrix (mL1.getFirst().getDimension(), 1);
+		DoubleMatrix p = new DoubleMatrix (mL1.getPoints().get(0).getRows(), 1);
+		DoubleMatrix lineVec = mL1.getVectors().get(0);
 		for (int cDim = 0; cDim < p.getRows(); ++cDim)
-			p.setCell(cDim, 0, mL1.getFirst().getPosition(cDim) + mScalar1 * mL1.getLineVector().getCell(cDim, 0));
+		{
+			double val = mL1.getPoints().get(0).getCell(cDim, 0) + mScalar1 * lineVec.getCell(cDim, 0);
+			p.setCell(cDim, 0, val);
+		}
 		return new Position (p.toIntegerMatrix());
 	}
 	
@@ -77,8 +81,10 @@ public class IntersectionSolver
 		return lines;
 	}
 	
-	public boolean solutionOnline()
+	public boolean isSolutionOnline()
 	{
+		if (mSolutionType == Result.INCONSISTENT)
+			throw new IntersectionSolverException ("non solvable linear equations");
 		return mOnline;
 	}
 	
@@ -93,24 +99,19 @@ public class IntersectionSolver
 			mScalar1 = solver.getMatrix().getCell(0, solver.getMatrix().getColumns() - 1);
 			mScalar2 = solver.getMatrix().getCell(1, solver.getMatrix().getColumns() - 1);
 			Position inter = getIntersection();
-			mOnline = true;
-			int cDim = 0;
-			while (cDim < mL1.getFirst().getDimension() && mOnline)
-			{
-				if (inter.getPosition(cDim) < Math.min(mL1.getFirst().getPosition(cDim), mL1.getSecond().getPosition (cDim)) &&
-					inter.getPosition(cDim) > Math.max(mL1.getFirst().getPosition(cDim), mL1.getSecond().getPosition (cDim)) &&
-					inter.getPosition(cDim) < Math.min(mL2.getFirst().getPosition(cDim), mL2.getSecond().getPosition (cDim)) &&
-					inter.getPosition(cDim) > Math.max(mL2.getFirst().getPosition(cDim), mL2.getSecond().getPosition (cDim)))
-					mOnline = false;
-				++cDim;
-			}
+			mOnline = mL1.isInRange(inter) && mL2.isInRange(inter);
 		}
-		else if (solver.allBasicVariables())
+		else if (!solver.isConsistent())
 			mSolutionType = Result.INCONSISTENT;
 		else
+		{
 			mSolutionType = Result.INFINITE;
+			mOnline = mL1.isInRange(new Glue (mL2.getPoints().get(0))) || mL1.isInRange(new Glue (mL2.getPoints().get(1)));
+		}
+		mGelim = solver;
 	}
 	
+	private GaussElim mGelim;
 	private Line mL1, mL2;
 	private Double mScalar1, mScalar2;
 	private Result mSolutionType;

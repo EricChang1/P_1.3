@@ -61,10 +61,10 @@ public class GaussElim implements Runnable
 		
 		while (cLess < cLarger)
 		{
-			while (pivotIndex[cLess] < pivotIndex[end] && cLess < cLarger)
+			while (cLess < cLarger && pivotIndex[cLess] < pivotIndex[end])
 				++cLess;
-			while (pivotIndex[cLarger] > pivotIndex[end] && cLess < cLarger)
-				++cLarger;
+			while (cLess < cLarger && pivotIndex[cLarger] >= pivotIndex[end])
+				--cLarger;
 			if (cLess < cLarger)
 			{
 				swap (rows, pivotIndex, cLess, cLarger);
@@ -99,7 +99,6 @@ public class GaussElim implements Runnable
 			System.out.println ("Initial");
 			mMat.print(System.out);
 		}
-		int[] mPivots = findmPivots();
 		order();
 		if (mDebug)
 		{
