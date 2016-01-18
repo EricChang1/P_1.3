@@ -42,7 +42,7 @@ public class IntersectionSolver
 	 * @return position of intersection
 	 * @throws IntersectionSolverException if there is no intersection
 	 */
-	public Position getIntersection (GaussElim solver) throws IntersectionSolverException
+	public Position getIntersection () throws IntersectionSolverException
 	{
 		if (mSolutionType == Result.INCONSISTENT)
 			throw new IntersectionSolverException ("non solvable linear equations");
@@ -98,7 +98,7 @@ public class IntersectionSolver
 			DoubleMatrix solution = solver.getTranslationVector();
 			for (int cVar = 0; cVar < solver.getNumberOfBasicVars(); ++cVar)
 				mScalars.add (solution.getCell(cVar, 0));
-			Position inter = getIntersection (solver);
+			Position inter = getIntersection();
 			mOnline = mS1.isInRange(inter) && mS2.isInRange(inter);
 		}
 		else if (!solver.isConsistent())
