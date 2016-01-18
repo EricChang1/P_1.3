@@ -213,7 +213,15 @@ public abstract class Matrix <T extends Number> implements Cloneable
 			}
 			return true;
 		}
+		
+		public void setCell (int row, int col, double val)
+		{
+			int roundScaled = (int) (val * Math.pow(10, PRECISION));
+			super.setCell(row, col, roundScaled / Math.pow (10, PRECISION));
+		}
 	}
+	
+	public static final int PRECISION = 5;
 	
 	/** Do nothing constructor which needs to be overridden by subclasses
 	 * @param rows rows of matrix
@@ -245,16 +253,16 @@ public abstract class Matrix <T extends Number> implements Cloneable
 	
 	public abstract Matrix<T> clone();
 	
-	
-	public Matrix<T> getScalarMatrix (double scalar)
+	/**
+	 * @param scalar number the scalar matrix should scale by
+	 * @param scalarMat object of appropriate size initialized with 0s in which to store the scalar matrix
+	 * @return
+	 */
+	public Matrix<T> getScalarMatrix (double scalar, Matrix<T> scalarMat)
 	{
-		Matrix<T> mat = this.clone();
-		for (int cRow = 0; cRow < getRows(); ++cRow)
-		{
-			for (int cCol = 0; cCol < getColumns(); ++cCol)
-				mat.setCell(cRow, cCol, getNumber (scalar));
-		}
-		return mat;
+		for (int cEntry = 0; cEntry < scalarMat.getRows(); ++cEntry)
+			scalarMat.setCell(cEntry, cEntry, getNumber (scalar));
+		return scalarMat;
 	}
 	
 	/**

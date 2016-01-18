@@ -60,7 +60,7 @@ public abstract class GeoShape
 	{
 		DoubleMatrix eqT = loadEquationMatrix();
 		DoubleMatrix eqG = g2.loadEquationMatrix();
-		eqG.getScalarMatrix(-1.0).multiply(eqG, eqG);
+		eqG.getScalarMatrix(-1.0, new DoubleMatrix (eqG.getRows(), eqG.getRows())).multiply(eqG, eqG);
 		DoubleMatrix eq = new DoubleMatrix (mDimension, eqT.getColumns() + eqG.getColumns() - 1);
 		eq.copyValues(eqT, 0, 0, 0, 0, eqT.getRows(), eqT.getColumns() - 1);
 		eq.copyValues(eqG, 0, eqT.getColumns() - 1, 0, 0, eqG.getRows(), eqG.getColumns() - 1);
@@ -92,7 +92,7 @@ public abstract class GeoShape
 			vC = tmp;
 		}
 		
-		Matrix<Double> negT = vT.get(0).getScalarMatrix(-1.0);
+		Matrix<Double> negT = vT.get(0).getScalarMatrix(-1.0, new DoubleMatrix (vT.get(0).getRows(), vT.get(0).getRows()));
 		for (DoubleMatrix v : vC)
 		{
 			DoubleMatrix neg = new DoubleMatrix (v.getRows(), v.getColumns());
@@ -126,7 +126,7 @@ public abstract class GeoShape
 			for (int cPoints = 1; cPoints < points.size(); ++cPoints)
 			{
 				max = Math.max(max, points.get(cPoints).getCell(cDim, 0));
-				min = Math.min(max, points.get(cPoints).getCell(cDim, 0));
+				min = Math.min(min, points.get(cPoints).getCell(cDim, 0));
 			}
 			
 			if (p.getPosition(cDim) < min || p.getPosition(cDim) > max)

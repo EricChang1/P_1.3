@@ -67,8 +67,10 @@ public class LineTest
 	@Test
 	public void intersectTest()
 	{
-		System.out.println("intersection: " + mIntersectionLines.getSolutionType());
-		assertTrue (mIntersectionLines.getSolutionType() == IntersectionSolver.Result.ONE);
+		System.out.print("intersection: " + mIntersectionLines.getSolutionType() + " ");
+		System.out.println ("on line " + mIntersectionLines.isSolutionOnline());
+		assertTrue (mIntersectionLines.getSolutionType() == IntersectionSolver.Result.ONE &&
+					mIntersectionLines.isSolutionOnline());
 	}
 	
 	@Test
