@@ -1,5 +1,7 @@
 package algorithm;
 
+import java.util.ArrayList;
+
 import algorithm.Matrix.*;
 
 /**
@@ -86,6 +88,7 @@ public class GaussElim implements Runnable
 	public GaussElim (DoubleMatrix m)
 	{
 		mMat = m.clone();
+		mOrig = m.clone();
 		mPivots = findmPivots();
 	}
 	
@@ -126,6 +129,44 @@ public class GaussElim implements Runnable
 	}
 	
 	/**
+	 * @return list of vectors spanning the solution set
+	 */
+	public ArrayList <DoubleMatrix> getSolutionVectors()
+	{
+		ArrayList <DoubleMatrix> vecs = new ArrayList <DoubleMatrix>();
+		
+		for (int cCol = mPivots[0]; cCol < mMat.getColumns() - 1; ++cCol)
+		{
+			DoubleMatrix vec = new DoubleMatrix (mMat.getRows(), 1);
+			for (int cRow = 0; cRow < mMat.getRows(); ++cRow)
+			{
+				if (mPivots[cRow] < cCol && !mMat.getCell(cRow, cCol).equals(0))
+				{
+					double coeff = mMat.getCell(cRow, cCol);
+					for (int cDim = 0; cDim < mMat.getRows(); ++cDim)
+						vec.setCell(cDim, 0, vec.getCell (cDim, 0) + coeff * mOrig.getCell(cRow, cCol));
+				}
+			}
+			if (!vec.equals (new DoubleMatrix (mMat.getRows(), 1)))
+				vecs.add (vec);
+		}
+		
+		
+		return vecs;
+	}
+	
+	/**
+	 * @return the vector which translates the subspace of the solution set
+	 */
+	public DoubleMatrix getTranslationVector()
+	{
+		DoubleMatrix trans = new DoubleMatrix (mMat.getRows(), 1);
+		for (int cRow = 0; cRow < mMat.getRows(); ++cRow)
+			trans.setCell(cRow, 0, mMat.getCell (cRow, mMat.getColumns() - 1));
+		return trans;
+	}
+	
+	/**
 	 * @return a clone of the internal matrix
 	 */
 	public DoubleMatrix getMatrix()
@@ -134,9 +175,31 @@ public class GaussElim implements Runnable
 	}
 	
 	/**
+	 * @return the number of free variables
+	 */
+	public int getNumberOfFreeVars()
+	{
+		int cnt = 0;
+		for (int pivot : mPivots)
+		{
+			if (pivot == mMat.getColumns())
+				++cnt;
+		}
+		return cnt;
+	}
+	
+	/**
+	 * @return the number of basic variables
+	 */
+	public int getNumberOfBasicVars()
+	{
+		return (mMat.getRows() - getNumberOfFreeVars());
+	}
+	
+	/**
 	 * @param startCol
 	 * @param endCol
-	 * @return true if all variables within startCol and endCol are basic variables
+	 * @return true if all variables are basic variables
 	 */
 	public boolean allBasicVariables ()
 	{
@@ -252,6 +315,6 @@ public class GaussElim implements Runnable
 		}
 	}
 	
-	private DoubleMatrix mMat;
+	private DoubleMatrix mMat, mOrig;
 	private int[] mPivots;
 }
