@@ -44,6 +44,13 @@ public class Block extends BasicShape implements Cloneable {
 		return value;
 	}
 	
+	public boolean equals (Block comp)
+	{
+		if (this.value != comp.value || !super.equals(comp))
+			return false;
+		return true;
+	}
+	
 	protected void addShape (Block b)
 	{
 		this.value += b.getValue();

@@ -35,6 +35,14 @@ public class Cuboid extends GeoShape
 		vecs.add (mV3.clone());
 		return vecs;
 	}
+	
+	public ArrayList <Integer> getDimensions()
+	{
+		ArrayList <Integer> dims = new ArrayList<Integer>();
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
+			dims.add (Math.abs (getSecond().getCell(cDim, 0) - getFirst().getCell(cDim, 0)));
+		return dims;
+	}
 
 	@Override
 	public DoubleMatrix loadEquationMatrix() 
@@ -49,10 +57,8 @@ public class Cuboid extends GeoShape
 	
 	public Container toContainer()
 	{
-		IntegerMatrix diff = new IntegerMatrix(getDimension(), 1);
-		for (int cDim = 0; cDim < getDimension(); ++cDim)
-			diff.setCell(cDim, 0, getSecond().getCell(cDim, 0) - getFirst().getCell(cDim, 0));
-		return new Container (diff.getCell(0, 0), diff.getCell(1, 0), diff.getCell(2, 0));
+		ArrayList <Integer> dims = getDimensions();
+		return new Container (dims.get(0), dims.get(1), dims.get(2));
 	}
 	
 	private DoubleMatrix mV1, mV2, mV3;

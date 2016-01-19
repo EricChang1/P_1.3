@@ -107,7 +107,9 @@ public class BasicShape
 	@SuppressWarnings("unchecked")
 	public BasicShape(ArrayList <IntegerMatrix> vectors, IntegerMatrix adjMatrix){
 
-		this.vectors = (ArrayList<IntegerMatrix>) vectors.clone();
+		this.vectors = new ArrayList<IntegerMatrix>();
+		for (IntegerMatrix vec : vectors)
+			this.vectors.add (vec.clone());
 		if (!numberOfCols(vectors)) 
 			throw new BadNumberOfCollumsException ("The vectors introduced are not 3x1");
 		dimensions = new ArrayList<Integer>();
@@ -122,6 +124,7 @@ public class BasicShape
 		mGlue = new Glue (zeroPos);
 		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
 			resetConnections(cVertex);
+		mVolume = -1;
 	}
 	
 	/**
@@ -132,6 +135,7 @@ public class BasicShape
 	{
 		this (clone.vectors, clone.adjMatrix);
 		mGlue = clone.mGlue;
+		mVolume = clone.mVolume;
 	}
 	
 	/**
@@ -339,6 +343,28 @@ public class BasicShape
 		return mGlue;
 	}
 	
+	/**
+	 * @return the volume of the basic shape
+	 */
+	public int getVolume()
+	{
+		if (mVolume < 0)
+		{
+			BasicShape cut = new BasicShape (this);
+			cut.addMissingRectanglePoints();
+			ArrayList <Cuboid> cubes = cut.decomposeIntoCuboids();
+			for (Cuboid cube : cubes)
+			{
+				ArrayList <Integer> dims = cube.getDimensions();
+				int vol = 1;
+				for (int dim : dims)
+					vol *= dim;
+				mVolume += vol;
+			}
+		}
+		return mVolume;
+	}
+	
 	/** calculates the maximum vector value
 	* @param vector ArrayList containing all the vectors
 	* @param index The index of the vector in the Matrix Handler
@@ -430,6 +456,17 @@ public class BasicShape
 		return vectors.size();
 	}
 	
+	
+	public boolean equals (BasicShape comp)
+	{
+		if (this.mVolume != comp.mVolume || this.mGlue != comp.mGlue ||
+			!this.dimensions.equals(comp.dimensions) || !this.adjMatrix.equals(comp.adjMatrix) ||
+			!this.mPossibleConnections.equals(comp.mPossibleConnections) ||
+			!this.vectors.equals(comp.vectors))
+			return false;
+		return true;
+	}
+	
 	/** Calculates the dimensions of a shape
 	** @param vectors ArrayList containing all the vectors
 	*/
@@ -446,6 +483,7 @@ public class BasicShape
 
 		}
 	}
+	
 	
 	public void addMissingRectanglePoints()
 	{
@@ -552,6 +590,7 @@ public class BasicShape
 	{
 		BasicShape bs = (BasicShape)b;
 		addVertices (bs.vectors, bs.adjMatrix);
+		mVolume += b.getVolume();
 	}
 	
 	/**
@@ -636,4 +675,5 @@ public class BasicShape
 	private ArrayList <ArrayList <RelatPos>> mPossibleConnections;
 	private IntegerMatrix adjMatrix;
 	private Glue mGlue;
+	private int mVolume;
 }

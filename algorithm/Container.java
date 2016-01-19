@@ -147,7 +147,6 @@ public class Container extends Block
 		block.glue (pos);
 		mGluedBlocks.put(glue, block);
 		addShape(block);
-		//@TODO keep track of volume of placed blocks
 	}
 	
 	/** @param pos Position queried block is at
