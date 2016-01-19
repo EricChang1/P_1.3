@@ -96,6 +96,17 @@ public abstract class GeoShape
 	}
 	
 	/**
+	 * @return euclidean distance between defining points
+	 */
+	public double getDefiningPointDistance()
+	{
+		double dist = 0;
+		for (int cDim = 0; cDim < getDimension(); ++cDim)
+			dist += Math.pow (mP2.getPosition(cDim) - mP1.getPosition(cDim), 2);
+		return Math.sqrt(dist);
+	}
+	
+	/**
 	 * @return dimension of the subspace the shape is in
 	 */
 	public int getDimension() { return mP1.getDimension(); }

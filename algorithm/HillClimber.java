@@ -37,7 +37,7 @@ public class HillClimber extends Algorithm
 	public void run()
 	{
 		super.run();
-		if (getContainer().checkPositionInside 1(mStartingPosition))
+		if (getContainer().checkPositionInside (mStartingPosition))
 			throw new IllegalStateException ("starting position is not within container");
 		
 		boolean init = true;
@@ -106,14 +106,8 @@ public class HillClimber extends Algorithm
 	 */
 	private Block selectPiece()
 	{
-		ArrayList <Block> available = new ArrayList <Block>();
-		for (Resource r : getPieces())
-		{
-			if (!r.isEmpty())
-				available.add (r.getBlock());
-		}
-		int selectIndex = mSelect.getBestBlock (available);
-		if (selectIndex < available.size())
+		int selectIndex = mSelect.getBestBlock (getPieces());
+		if (selectIndex < getPieces().size())
 		{
 			getPieces().get(selectIndex).deduct();
 			return getPieces().get(selectIndex).getBlock();

@@ -26,6 +26,28 @@ public class BasicShape
 		public BadNumberOfCollumsException (String message) { super (message); }
 	}
 	
+	/**
+	 * @param points list of points
+	 * @param connected 2d list of points connected to points
+	 * @return adjacency matrix containing connections in connected to points
+	 */
+	public static IntegerMatrix buildAdjacencyMatrix (ArrayList <IntegerMatrix> points, ArrayList <ArrayList <IntegerMatrix>> connected)
+	{
+		IntegerMatrix adj = new IntegerMatrix (points.size(), points.size());
+		for (int cPoint = 0; cPoint < points.size(); ++cPoint)
+		{
+			for (IntegerMatrix connect : connected.get(cPoint))
+			{
+				int cFindConnect = 0;
+				while (cFindConnect < points.size() && !points.get(cFindConnect).equals(connect))
+					++cFindConnect;
+				adj.setCell(cPoint, cFindConnect, 1);
+				adj.setCell(cFindConnect, cPoint, 1);
+			}
+		}
+		return adj;
+	}
+	
 	/** Creates a rotation matrix based on given angles of rotation
 	 * @param angle1 Desired amount of rotation in x2 axis (in degrees)
 	 * @param angle2 Desired amount of rotation in x3 axis (in degrees)
@@ -52,6 +74,36 @@ public class BasicShape
 		return rotationMatrix1.multiply (rotationMatrix2, new Matrix.DoubleMatrix (3, 3));
 	}
 	
+	/**
+	 * @param r relative position
+	 * @param dimension dimension of the vector
+	 * @return return vector to relative position in dimension
+	 */
+	public static IntegerMatrix getRelativePosVector (RelatPos r, int dimension)
+	{
+		IntegerMatrix v = new IntegerMatrix (dimension, 1);
+		switch (r)
+		{
+		case ABOVE:	v.setCell(2, 0, 1);
+			break;
+		case BACK:	v.setCell(0, 0, -1);
+			break;
+		case BELOW:	v.setCell(2, 0, -1);
+			break;
+		case FRONT:	v.setCell(0, 0, 1);
+			break;
+		case LEFT:	v.setCell(1, 0, -1);
+			break;
+		case RIGHT:	v.setCell(1, 0, 1);
+		}
+		return v;
+	}
+	
+	/**
+	 * constructs basic shape from parameters
+	 * @param vectors list of vectors
+	 * @param adjMatrix adjacency matrix
+	 */
 	@SuppressWarnings("unchecked")
 	public BasicShape(ArrayList <IntegerMatrix> vectors, IntegerMatrix adjMatrix){
 
@@ -101,7 +153,9 @@ public class BasicShape
 		return lines;
 	}
 	
-
+	/**
+	 * @return list of the sides of the basic shape
+	 */
 	public ArrayList <Rectangle> getRectangles()
 	{
 		ArrayList <Rectangle> rects = new ArrayList<Rectangle>();
@@ -122,6 +176,72 @@ public class BasicShape
 			}
 		}
 		return rects;
+	}
+	
+	/**
+	 * cuts the empty space into cuboids
+	 * @return list of these cuboids
+	 */
+	public ArrayList <Cuboid> decomposeIntoCuboids()
+	{
+		BasicShape divided = new BasicShape (this);
+		divided.addMissingRectanglePoints();
+		
+		ArrayList <Cuboid> cuboids = new ArrayList <Cuboid>();
+		for (int cRow = 0; cRow < getNumberOfVertices(); ++cRow)
+		{
+			
+			for (int cCol = cRow + 1; cCol < getNumberOfVertices(); ++cCol)
+			{
+				//if there is a new connection
+				if (adjMatrix.getCell(cRow, cCol).equals(0) && 
+					divided.adjMatrix.getCell(cRow, cCol).equals(1))
+				{
+					ArrayList <Integer> triangleBase = findTriangleIndices (cRow, cCol);
+					for (int indTriangle : triangleBase)
+					{
+						ArrayList <Integer> triangleDiag = findTriangleIndices (indTriangle, cRow);
+						for (int diag : triangleDiag)
+							cuboids.add (new Cuboid (new Glue (getVertex (cRow)), new Glue (getVertex (diag))));
+					}
+				}
+			}
+		}
+		return cuboids;
+	}
+	
+	/**
+	 * @param indDirect point to be directly connected
+	 * @param indIndirect point to be indirectly connected
+	 * @return set of all vertices directly connected to indDirect and indirectly connected to indIndirect
+	 */
+	public ArrayList <Integer> findTriangleIndices (int indDirect, int indIndirect)
+	{
+		ArrayList <Integer> tPoints = new ArrayList <Integer>();
+		IntegerMatrix indirectAdjacency = getIndirectAdjacencyMatrix(indIndirect);
+		for (int cCol = 0; cCol < getNumberOfVertices(); ++cCol)
+		{
+			if (adjMatrix.getCell(indDirect, cCol).equals(1) && 
+				indirectAdjacency.getCell (indIndirect, cCol).equals(1))
+				tPoints.add (cCol);
+		}
+		return tPoints;
+	}
+	
+	/**
+	 * @param l2 line to search for intersection
+	 * @return list of intersection points
+	 */
+	public ArrayList <IntegerMatrix> getLineIntersections (Line l2)
+	{
+		ArrayList <IntegerMatrix> intersections = new ArrayList<Matrix.IntegerMatrix>();
+		for (Line l1 : getConnectingLines())
+		{
+			IntersectionSolver solver = new IntersectionSolver (l1, l2);
+			if (solver.getSolutionType() == IntersectionSolver.Result.ONE)
+				intersections.add (solver.getIntersection().toVector());
+		}
+		return intersections;
 	}
 	
 	/**
@@ -167,6 +287,25 @@ public class BasicShape
 			}
 		}
 		return connections;
+	}
+	
+	/**
+	 * @param index index of vertex to search for common connections
+	 * @return square matrix containing a 1 for every other vertex that is a shared connection
+	 */
+	public IntegerMatrix getIndirectAdjacencyMatrix (int index)
+	{
+		IntegerMatrix indirectAdj = new IntegerMatrix (vectors.size(), vectors.size());
+		for (int cRow = 0; cRow < indirectAdj.getRows(); ++cRow)
+		{
+			for (int cCol = 0; cCol < indirectAdj.getColumns(); ++cCol)
+			{
+				if (cRow != index && adjMatrix.getCell(cRow, cCol).equals(1) && 
+					adjMatrix.getCell(index, cCol).equals(1))
+					indirectAdj.setCell(cRow, cCol, 1);
+			}
+		}
+		return indirectAdj;
 	}
 	
 	/**
@@ -308,6 +447,62 @@ public class BasicShape
 		}
 	}
 	
+	public void addMissingRectanglePoints()
+	{
+		//contain: new points, connections of these
+		ArrayList <IntegerMatrix> newPoints = new ArrayList<Matrix.IntegerMatrix>();
+		ArrayList <ArrayList<IntegerMatrix>> newPointsConnections = new ArrayList<ArrayList<IntegerMatrix>>();
+		//iterate through vertices
+		for (int cVert = 0; cVert < getNumberOfVertices(); ++cVert)
+		{
+			//iterate through free connections
+			ArrayList<RelatPos> freeConn = mPossibleConnections.get(cVert);
+			for (RelatPos free : freeConn)
+			{
+				//compute line through current vertex and current free connection vector
+				IntegerMatrix vertex = getVertex(cVert);
+				IntegerMatrix pDirect = getRelativePosVector(free, vertex.getRows());
+				boolean beyondDimension = false;
+				for (int cDim = 0; cDim < pDirect.getRows(); ++cDim)
+				{
+					pDirect.setCell(cDim, 0, pDirect.getCell (cDim, 0) + vertex.getCell (cDim, 0));
+					if (pDirect.getCell(cDim, 0) < 0 || pDirect.getCell(cDim, 0) > getDimensions (cDim))
+						beyondDimension = true;
+				}
+				if (!beyondDimension)
+				{
+					Line intersect = new Line (new Glue (vertex), new Glue (pDirect));
+					ArrayList <Line> connections = getConnectingLines();
+					//search for intersection with existing lines for positive scalar of line vector
+					for (Line connect : connections)
+					{
+						IntersectionSolver solver = new IntersectionSolver (intersect, connect);
+						if (solver.getSolutionType() == IntersectionSolver.Result.ONE &&
+							solver.getScalars().get(0) > 0)
+						{
+							//store intersection point & related connections
+							IntegerMatrix inter = solver.getIntersection().toVector();
+							newPoints.add (inter);
+							newPoints.add (vertex);
+							newPoints.add (connect.getFirst());
+							newPoints.add (connect.getSecond());
+							ArrayList<IntegerMatrix> newConnections = new ArrayList<Matrix.IntegerMatrix>();
+							newConnections.add (vertex);
+							newConnections.add (connect.getFirst());
+							newConnections.add (connect.getSecond());
+							newPointsConnections.add(newConnections);
+							//add empty list for connected points
+							for (int cnt = 0; cnt < 3; ++cnt)
+								newPointsConnections.add(new ArrayList <IntegerMatrix>());
+						}
+					}
+				}
+			}
+		}
+		IntegerMatrix adjMatMissing = buildAdjacencyMatrix(newPoints, newPointsConnections);
+		addVertices (newPoints, adjMatMissing);
+	}
+	
 	/** Performs actual rotation
 	 * @param rotMatrix created from rotationMatrix()
 	 * @return matrix after rotation
@@ -356,46 +551,58 @@ public class BasicShape
 	protected void addShape (Block b)
 	{
 		BasicShape bs = (BasicShape)b;
-		int prevNumVertices = getNumberOfVertices();
-		//edit vertex list
-		addVertices (bs.vectors);
-		//enlarge free connections list
-		for (int newAdded = 0; newAdded < vectors.size() - prevNumVertices; ++newAdded)
-			mPossibleConnections.add (new ArrayList<RelatPos>(Arrays.asList (RelatPos.values())));
-		//edit adjacency matrix
-		IntegerMatrix oldAdjMat = adjMatrix;
-		adjMatrix = new IntegerMatrix (vectors.size(), vectors.size());
-		adjMatrix.copyValues(oldAdjMat, 0, 0, 0, 0, oldAdjMat.getRows(), oldAdjMat.getColumns());
-		//iterate through newly added vertices
-		
-		for (int cNewVertex = 0; cNewVertex < bs.getNumberOfVertices(); ++cNewVertex)
-		{
-			int iVertex = this.getVertexIndex(bs.getVertex(cNewVertex));
-			assert (iVertex < getNumberOfVertices());
-			ArrayList<IntegerMatrix> connected = bs.lookUpConnections(cNewVertex);
-			//copy connections from bs
-			for (IntegerMatrix connection : connected)
-			{
-				int connectionIndex = this.getVertexIndex(connection);
-				adjMatrix.setCell(iVertex, connectionIndex, 1);
-				adjMatrix.setCell(connectionIndex, iVertex, 1);
-			}
-			resetConnections(iVertex);
-		}
+		addVertices (bs.vectors, bs.adjMatrix);
 	}
 	
 	/**
-	 * Adds newVertices to vectors in the exact order, removing duplicates
-	 * @param newVertices set of vectors being vertices to add
+	 * adds missing points in newVertices to list of vectors in their exact order
+	 * adds elements to mPossibleConnections
+	 * fills in connections in adjacent
+	 * @param newVertices vertices to add
+	 * @param adjacent adjacency matrix containing connections of vertices to add
 	 */
-	private void addVertices (ArrayList <IntegerMatrix> newVertices)
+	private void addVertices (ArrayList <IntegerMatrix> newVertices, IntegerMatrix adjacent)
 	{
-		for (int cBSVertex = 0; cBSVertex < newVertices.size(); ++cBSVertex)
+		//stores indices in list in this object of every element in newVertices
+		ArrayList <Integer> addedIndices = new ArrayList<Integer>();
+		//add vertices not yet contained to the end
+		for (int cNewVertex = 0; cNewVertex < newVertices.size(); ++cNewVertex)
 		{
-			int cVertex = getVertexIndex(newVertices.get (cBSVertex));
+			int cVertex = getVertexIndex (newVertices.get(cNewVertex));
 			if (cVertex == vectors.size())
-				vectors.add (newVertices.get(cBSVertex).clone());
+			{
+				vectors.add (newVertices.get(cNewVertex));
+				mPossibleConnections.add (new ArrayList <RelatPos> (Arrays.asList (RelatPos.values())));
+			}
+			addedIndices.add (cVertex);
 		}
+		
+		//copy adjacency matrix into larger one if necessary
+		if (vectors.size() > adjMatrix.getRows())
+		{
+			IntegerMatrix oldAdjMat = adjMatrix;
+			adjMatrix = new IntegerMatrix (vectors.size(), vectors.size());
+			adjMatrix.copyValues(oldAdjMat, 0, 0, 0, 0, oldAdjMat.getRows(), oldAdjMat.getColumns());
+		}
+		
+		//fill in connections in adjacent
+		for (int cNewVertex = 0; cNewVertex < newVertices.size(); ++cNewVertex)
+		{
+			int iVertex = addedIndices.get(cNewVertex);
+			for (int cAdj = 0; cAdj < adjacent.getColumns(); ++cAdj)
+			{
+				if (adjacent.getCell (cNewVertex, cAdj).equals(1))
+				{
+					int iAdj = getVertexIndex (newVertices.get(cAdj));
+					adjMatrix.setCell (iVertex, iAdj, 1);
+					adjMatrix.setCell (iAdj, iVertex, 1);
+				}
+			}
+		}
+		
+		//compute remaining connections
+		for (int addedIndex : addedIndices)
+			resetConnections (addedIndex);
 	}
 	
 	/**
@@ -406,9 +613,9 @@ public class BasicShape
 	{
 		ArrayList <IntegerMatrix> connections = lookUpConnections(iVertex);
 		IntegerMatrix vertex = getVertex(iVertex);
+		ArrayList <RelatPos> remain = mPossibleConnections.get(iVertex);
 		for (IntegerMatrix conn : connections)
 		{
-			ArrayList <RelatPos> remain = mPossibleConnections.get(iVertex);
 			if (conn.getCell(0, 0) < vertex.getCell(0, 0))
 				remain.remove(RelatPos.BACK);
 			else if (conn.getCell(0, 0) > vertex.getCell(0, 0))
