@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import algorithm.Matrix.IntegerMatrix;
 import algorithm.Matrix.*;
 
 public class BasicShape
@@ -154,7 +153,9 @@ public class BasicShape
 		return lines;
 	}
 	
-	
+	/**
+	 * @return list of the sides of the basic shape
+	 */
 	public ArrayList <Rectangle> getRectangles()
 	{
 		ArrayList <Rectangle> rects = new ArrayList<Rectangle>();
@@ -177,19 +178,54 @@ public class BasicShape
 		return rects;
 	}
 	
-	public ArrayList <Cuboid> getCubes()
+	/**
+	 * cuts the empty space into cuboids
+	 * @return list of these cuboids
+	 */
+	public ArrayList <Cuboid> decomposeIntoCuboids()
 	{
-		ArrayList <Rectangle> rects = getRectangles();
-		//sort: rectangles belonging to vertices, first ones get it
+		BasicShape divided = new BasicShape (this);
+		divided.addMissingRectanglePoints();
 		
-		ArrayList <Cuboid> cubes = new ArrayList <Cuboid>();
-		for (int cVertex = 0; cVertex < getNumberOfVertices(); ++cVertex)
+		ArrayList <Cuboid> cuboids = new ArrayList <Cuboid>();
+		for (int cRow = 0; cRow < getNumberOfVertices(); ++cRow)
 		{
-			for (int cOppoVertex = cVertex + 1; cOppoVertex < getNumberOfVertices(); ++cOppoVertex)
+			
+			for (int cCol = cRow + 1; cCol < getNumberOfVertices(); ++cCol)
 			{
-				//for every connection of coppo vertex: check whether it is other point in rect
+				//if there is a new connection
+				if (adjMatrix.getCell(cRow, cCol).equals(0) && 
+					divided.adjMatrix.getCell(cRow, cCol).equals(1))
+				{
+					ArrayList <Integer> triangleBase = findTriangleIndices (cRow, cCol);
+					for (int indTriangle : triangleBase)
+					{
+						ArrayList <Integer> triangleDiag = findTriangleIndices (indTriangle, cRow);
+						for (int diag : triangleDiag)
+							cuboids.add (new Cuboid (new Glue (getVertex (cRow)), new Glue (getVertex (diag))));
+					}
+				}
 			}
 		}
+		return cuboids;
+	}
+	
+	/**
+	 * @param indDirect point to be directly connected
+	 * @param indIndirect point to be indirectly connected
+	 * @return set of all vertices directly connected to indDirect and indirectly connected to indIndirect
+	 */
+	public ArrayList <Integer> findTriangleIndices (int indDirect, int indIndirect)
+	{
+		ArrayList <Integer> tPoints = new ArrayList <Integer>();
+		IntegerMatrix indirectAdjacency = getIndirectAdjacencyMatrix(indIndirect);
+		for (int cCol = 0; cCol < getNumberOfVertices(); ++cCol)
+		{
+			if (adjMatrix.getCell(indDirect, cCol).equals(1) && 
+				indirectAdjacency.getCell (indIndirect, cCol).equals(1))
+				tPoints.add (cCol);
+		}
+		return tPoints;
 	}
 	
 	/**
@@ -251,6 +287,25 @@ public class BasicShape
 			}
 		}
 		return connections;
+	}
+	
+	/**
+	 * @param index index of vertex to search for common connections
+	 * @return square matrix containing a 1 for every other vertex that is a shared connection
+	 */
+	public IntegerMatrix getIndirectAdjacencyMatrix (int index)
+	{
+		IntegerMatrix indirectAdj = new IntegerMatrix (vectors.size(), vectors.size());
+		for (int cRow = 0; cRow < indirectAdj.getRows(); ++cRow)
+		{
+			for (int cCol = 0; cCol < indirectAdj.getColumns(); ++cCol)
+			{
+				if (cRow != index && adjMatrix.getCell(cRow, cCol).equals(1) && 
+					adjMatrix.getCell(index, cCol).equals(1))
+					indirectAdj.setCell(cRow, cCol, 1);
+			}
+		}
+		return indirectAdj;
 	}
 	
 	/**
