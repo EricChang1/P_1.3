@@ -2,7 +2,7 @@ package algorithm;
 
 public class EvaluationHeuristicFactory {
 	
-	public EvaluationHeuristic getHeuristic(EvaluationHeuristicType h)
+	public EvaluationHeuristic getHeuristicEval(EvaluationHeuristicType h)
 	{
 		switch(h)
 		{
