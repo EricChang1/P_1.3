@@ -15,6 +15,7 @@ public class Block extends BasicShape implements Cloneable {
 	public Block (ArrayList<IntegerMatrix> matrixHVectors, IntegerMatrix adjMat, double value)
 	{
 		super (matrixHVectors, adjMat);
+		this.value = value;
 	}
 	/**
 	*Constructor to pass the value with the BasicShape object
@@ -24,6 +25,7 @@ public class Block extends BasicShape implements Cloneable {
 	public Block(BasicShape bShape, double value)
 	{
 		super (bShape);
+		this.value = value;
 	}
 	
 	/**
