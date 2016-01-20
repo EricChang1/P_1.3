@@ -1,11 +1,16 @@
 package test.algorithmTest;
 
 
+import geometry.IntersectionSolver;
+import geometry.Line;
+import geometry.Rectangle;
+import models.Glue;
+import models.Matrix.*;
+
 import org.junit.Test;
 import org.junit.Assert.*;
 
 import algorithm.*;
-import algorithm.Matrix.*;
 
 public class RectangleTest 
 {

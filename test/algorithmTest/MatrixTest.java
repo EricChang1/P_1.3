@@ -4,9 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
+import models.Matrix.*;
+
 import org.junit.Test;
 
-import algorithm.Matrix.*;
 
 /**
  * Test class for matrix class
