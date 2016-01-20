@@ -52,6 +52,9 @@ public class GUIMenu{
 		/**Adding Choices*/
 		sortingChoice.add("Greedy");
 		sortingChoice.add("Dynamic");
+		sortingChoice.add("HillClimber");
+		sortingChoice.add("Random");
+		sortingChoice.add("Depth-First Tree Search");
 		itemChoice.add("A,B,C packages");
 		itemChoice.add("P,L,T pentominoes");
 		
