@@ -1,9 +1,16 @@
 package algorithm;
 
+import geometry.Cuboid;
+
 import java.util.*;
 import java.util.Map.Entry;
 
-import algorithm.Matrix.*;
+import models.Block;
+import models.Container;
+import models.Glue;
+import models.Resource;
+import models.Matrix.*;
+
 
 public class DynamicAlgo extends Algorithm 
 {
@@ -110,7 +117,7 @@ public class DynamicAlgo extends Algorithm
 				}
 			}
 		}
-		
+		//carry on? read up first again...
 	}
 	
 	public void init (Container container, ArrayList <Resource> pieces)

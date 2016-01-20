@@ -1,6 +1,7 @@
 package algorithm;
 
 import java.util.ArrayList;
+import models.*;
 
 public class HighestValueInvDensity implements SelectionHeuristic {
 	

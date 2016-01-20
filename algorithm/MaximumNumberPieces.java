@@ -1,5 +1,7 @@
 package algorithm;
 
+import models.*;
+
 public class MaximumNumberPieces implements EvaluationHeuristic{
 	
 	public MaximumNumberPieces(){

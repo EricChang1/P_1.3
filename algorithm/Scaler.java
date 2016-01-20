@@ -1,6 +1,8 @@
 package algorithm;
 import java.util.ArrayList;
 
+import models.Matrix;
+
 public class Scaler
 {
 	public class InconsistentVectorsException extends IllegalArgumentException

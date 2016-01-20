@@ -1,9 +1,13 @@
 package test.algorithmTest;
 
 import algorithm.*;
-import algorithm.Matrix.IntegerMatrix;
-import algorithm.Matrix.*;
 import java.util.*;
+
+import models.Block;
+import models.Container;
+import models.Glue;
+import models.Position;
+import models.Matrix.*;
 
 public class ContainerTest 
 {
@@ -49,7 +53,7 @@ public class ContainerTest
 		mContainer.placeBlock(cuboid1, posZero);
 		mContainer.print(System.out);
 		
-		Position posInsideConflict_Placed = setVector (2, 1, 3);
+		Position posInsideConflict_Placed = setVector (1, 1, 2);
 		System.out.println ("demo 2|1|3");
 		printPlaceTest (mContainer, cuboid2, posInsideConflict_Placed);
 		
@@ -62,9 +66,11 @@ public class ContainerTest
 			printPlaceTest (mContainer, cuboid2, relat);
 			if (mContainer.checkPositionInside(relat) && mContainer.checkPositionOverlap(cuboid2, relat))
 			{
-				System.out.println ("success!");
 				mContainer.placeBlock(cuboid2, relat);
+				System.out.println ("Can block be found?");
+				//Block b = mContainer.getBlockAt(relat);
 				mContainer.print(System.out);
+				System.out.println ("success!");
 				break;
 			}
 		}

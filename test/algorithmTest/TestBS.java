@@ -1,9 +1,17 @@
 package test.algorithmTest;
 
 import algorithm.*;
-import algorithm.Matrix.*;
+
+import geometry.Rectangle;
 
 import java.util.ArrayList;
+
+import models.BasicShape;
+import models.Block;
+import models.Container;
+import models.Glue;
+import models.Matrix;
+import models.Matrix.*;
 
 public class TestBS 
 {
@@ -89,7 +97,7 @@ public class TestBS
 		System.out.println ("Before adding");
 		mBs.print (System.out);
 		//change to public for testing
-		mBs.addShape (addShape);
+		//mBs.addShape (addShape);
 		System.out.println ("After adding");
 		mBs.print (System.out);
 	}

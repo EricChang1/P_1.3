@@ -3,6 +3,9 @@ package algorithm;
 import java.util.ArrayList;
 import java.util.Random;
 
+import models.Position;
+import models.Resource;
+
 /**
  * @author martin
  *	algorithm which chooses one piece and one vertex in container randomly
