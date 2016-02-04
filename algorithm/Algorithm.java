@@ -2,9 +2,6 @@ package algorithm;
 
 import java.util.ArrayList;
 
-import models.Container;
-import models.Resource;
-
 /**
  * base class for all algorithms
  * the class can be in 3 states: 1) not started, 2) started but not terminated, 3) terminated

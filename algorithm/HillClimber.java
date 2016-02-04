@@ -2,12 +2,7 @@ package algorithm;
 
 import java.util.ArrayList;
 
-import models.Block;
-import models.Container;
-import models.Glue;
-import models.Position;
-import models.Matrix.IntegerMatrix;
-
+import algorithm.Matrix.IntegerMatrix;
 
 /**
  * class performing a hill climbing algorithm
@@ -29,9 +24,9 @@ public class HillClimber extends Algorithm
 	
 	/**
 	 * Sets position where the algorithm will start placing
-	 * @param glue
+	 * @param start
 	 */
-	public void setStartingPosition (Glue start)
+	public void setStartingPosition (Position start)
 	{
 		mStartingPosition = start;
 	}
@@ -42,7 +37,7 @@ public class HillClimber extends Algorithm
 	public void run()
 	{
 		super.run();
-		if (!getContainer().checkPositionInside (mStartingPosition))
+		if (getContainer().checkPositionInside (mStartingPosition))
 			throw new IllegalStateException ("starting position is not within container");
 		
 		boolean init = true;

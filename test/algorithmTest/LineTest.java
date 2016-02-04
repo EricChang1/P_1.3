@@ -2,15 +2,10 @@ package test.algorithmTest;
 
 import static org.junit.Assert.*;
 
-import geometry.IntersectionSolver;
-import geometry.Line;
-
-import models.Glue;
-import models.Matrix.*;
-
 import org.junit.Test;
 
 import algorithm.*;
+import algorithm.Matrix.*;
 
 public class LineTest 
 {
@@ -73,9 +68,9 @@ public class LineTest
 	public void intersectTest()
 	{
 		System.out.print("intersection: " + mIntersectionLines.getSolutionType() + " ");
-		System.out.println ("on line " + mIntersectionLines.isWithinBounds());
+		System.out.println ("on line " + mIntersectionLines.isSolutionOnline());
 		assertTrue (mIntersectionLines.getSolutionType() == IntersectionSolver.Result.ONE &&
-					mIntersectionLines.isWithinBounds());
+					mIntersectionLines.isSolutionOnline());
 	}
 	
 	@Test
