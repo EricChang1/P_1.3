@@ -1,12 +1,6 @@
 package algorithm;
 import java.util.ArrayList;
 
-import models.BasicShape;
-import models.Block;
-import models.Container;
-import models.Matrix;
-import models.Position;
-
 import algorithm.*;
 
 public class GreedyAlgorithm extends Algorithm {

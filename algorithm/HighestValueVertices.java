@@ -1,8 +1,6 @@
 package algorithm;
 import java.util.ArrayList;
 
-import models.*;
-
 public class HighestValueVertices implements SelectionHeuristic {
 	
 	public HighestValueVertices()

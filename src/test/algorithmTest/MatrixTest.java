@@ -116,7 +116,7 @@ public class MatrixTest
 	{
 		IntegerMatrix sub = new IntegerMatrix(2, 1);
 		int rowOff = 1, colOff = 1;
-		sub.copyValues(mIMat, 0, 0, rowOff, colOff, sub.getRows(), sub.getColumns());
+		sub.copyValues(mIMat, rowOff, colOff);
 		for (int cRow = 0; cRow < sub.getRows(); ++cRow)
 		{
 			for (int cCol = 0; cCol < sub.getColumns(); ++cCol)
