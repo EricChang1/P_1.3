@@ -5,10 +5,11 @@ public class MaximumNumberPieces implements EvaluationHeuristic{
 	public MaximumNumberPieces(){
 		
 	}
-	public double getScore(Container box){
-		this.truck = box;
-		return truck.getValue();
-		
+
+	@Override
+	public double getScore(Block block, Position pos) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
-	private Container truck;
+
 }

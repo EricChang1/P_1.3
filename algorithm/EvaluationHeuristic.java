@@ -2,7 +2,7 @@ package algorithm;
 
 public interface EvaluationHeuristic {
 	
-	public double getScore(Container container);
+	public double getScore(Block block, Position pos);
 	
 
 }
